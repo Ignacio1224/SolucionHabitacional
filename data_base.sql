@@ -368,3 +368,31 @@ AS
     SELECT CAST(SCOPE_IDENTITY() AS NVARCHAR);
 
 GO
+
+-- Create a new stored procedure called 'Select_UserSystem' in schema 'SolucionHabitacional'
+-- Drop the stored procedure if it already exists
+IF EXISTS (
+SELECT *
+    FROM INFORMATION_SCHEMA.ROUTINES
+WHERE SPECIFIC_SCHEMA = N'SolucionHabitacional'
+    AND SPECIFIC_NAME = N'Select_UserSystem'
+)
+DROP PROCEDURE SolucionHabitacional.Select_UserSystem
+GO
+-- Create the stored procedure in the specified schema
+CREATE PROCEDURE SolucionHabitacional.Select_UserSystem
+    @documento [NVARCHAR] (24) = NULL
+AS
+    SET NOCOUNT ON;
+    IF (@documento = NULL)
+    BEGIN
+        -- Select rows from a Table or View 'USER_SYSTEM' in schema 'SolucionHabitacional'
+        SELECT * FROM SolucionHabitacional.USER_SYSTEM;
+    END
+    ELSE BEGIN
+        -- Select rows from a Table or View 'USER_SYSTEM' in schema 'SolucionHabitacional'
+        SELECT * FROM SolucionHabitacional.USER_SYSTEM
+        WHERE documento = @documento;
+    END
+    
+GO

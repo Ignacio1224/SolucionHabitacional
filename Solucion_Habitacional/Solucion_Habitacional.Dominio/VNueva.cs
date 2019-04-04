@@ -9,5 +9,9 @@ namespace Solucion_Habitacional.Dominio
     public class VNueva : Vivienda
     {
 
+        public override double CalcularPrecio()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

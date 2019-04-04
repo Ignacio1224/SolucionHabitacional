@@ -19,21 +19,6 @@ CREATE DATABASE SolucionHabitacional
 GO
 
 USE SolucionHabitacional;
-
--- Create a new table called 'USER_SYSTEM' in schema 'SolucionHabitacional'
--- Drop the table if it already exists
-IF OBJECT_ID('SolucionHabitacional.USER_SYSTEM', 'U') IS NOT NULL
-DROP TABLE SolucionHabitacional.USER_SYSTEM
-GO
--- Create the table in the specified schema
-CREATE TABLE SolucionHabitacional.USER_SYSTEM
-(
-    documento [NVARCHAR] (24) NOT NULL,
-    nombre [NVARCHAR](254) NOT NULL,
-    apellido [NVARCHAR](254) NOT NULL
-
-    CONSTRAINT pk_USER_SYSTEM PRIMARY KEY (documento)
-);
 GO
 
 -- Create a new table called 'PASANTE' in schema 'SolucionHabitacional'
@@ -44,13 +29,11 @@ GO
 -- Create the table in the specified schema
 CREATE TABLE SolucionHabitacional.PASANTE
 (
-    documento [NVARCHAR] (24) NOT NULL,
     userName [NVARCHAR] (254) NOT NULL,
+    -- Email
     userPassword [NVARCHAR] (254) NOT NULL,
 
-    CONSTRAINT pk_PASANTE PRIMARY KEY (documento),
-    CONSTRAINT fk_documento_PASANTE FOREIGN KEY (documento) REFERENCES USER_SYSTEM (documento),
-    CONSTRAINT un_userName_PASANTE UNIQUE (userName)
+    CONSTRAINT pk_PASANTE PRIMARY KEY (userName)
 );
 GO
 
@@ -63,10 +46,9 @@ GO
 CREATE TABLE SolucionHabitacional.PARAMETRO
 (
     nombre [NVARCHAR] (254) NOT NULL,
-    fecha_vigencia DATETIME2 NOT NULL,
     valor [NVARCHAR] (254) NOT NULL,
 
-    CONSTRAINT pk_PARAMETRO PRIMARY KEY (nombre, fecha_vigencia)
+    CONSTRAINT pk_PARAMETRO PRIMARY KEY (nombre)
 );
 GO
 
@@ -102,8 +84,6 @@ CREATE TABLE SolucionHabitacional.VIVIENDA
     superficie DECIMAL (18, 4) NOT NULL,
     anio_construccion INT,
     precio_base DECIMAL (18, 4) NOT NULL,
-    cotizacion DECIMAL (18, 4) NOT NULL,
-    precio_final DECIMAL (18, 4) NOT NULL,
     habilitada CHAR (1) NOT NULL,
     vendida CHAR (1) NOT NULL,
     barrio [NVARCHAR] (254) NOT NULL,
@@ -123,11 +103,9 @@ GO
 CREATE TABLE SolucionHabitacional.VNUEVA
 (
     vivienda INT NOT NULL,
-    superficie_max DECIMAL (18, 4) NOT NULL,
-    /* ESTOY EN DUDA*/
-    tiempo_financiacion INT,
+    precio_final DECIMAL (18, 4) NOT NULL
 
-    CONSTRAINT pk_VNUEVA PRIMARY KEY (vivienda),
+        CONSTRAINT pk_VNUEVA PRIMARY KEY (vivienda),
     CONSTRAINT fk_vivienda_VIVIENDA FOREIGN KEY (vivienda) REFERENCES VIVIENDA (id)
 );
 GO
@@ -141,9 +119,7 @@ GO
 CREATE TABLE SolucionHabitacional.VUSADA
 (
     vivienda INT NOT NULL,
-    impuesto_transacciones_patrimoniales DECIMAL (18, 4) NOT NULL,
-    /* ESTOY EN DUDA*/
-    tiempo_financiacion INT,
+    precio_final DECIMAL (18, 4) NOT NULL,
     contribucion DECIMAL (18, 4),
 
     CONSTRAINT pk_VNUEVA PRIMARY KEY (vivienda),
@@ -154,44 +130,11 @@ GO
 
 /* STORED PROCEDURES */
 
--- Create a new stored procedure called 'Insert_User_System' in schema 'SolucionHabitacional'
--- Drop the stored procedure if it already exists
-IF EXISTS (
-SELECT *
-    FROM INFORMATION_SCHEMA.ROUTINES
-WHERE SPECIFIC_SCHEMA = N'SolucionHabitacional'
-    AND SPECIFIC_NAME = N'Insert_User_System'
-)
-DROP PROCEDURE SolucionHabitacional.Insert_User_System
-GO
--- Create the stored procedure in the specified schema
-CREATE PROCEDURE SolucionHabitacional.Insert_User_System
-    @documento [NVARCHAR] (24) = NULL,
-    @nombre [NVARCHAR] (254) = NULL, 
-    @apellido [NVARCHAR] (254) = NULL
-AS
-    SET NOCOUNT ON;
-    
-    -- Insert rows into table 'USER_SYSTEM'
-    INSERT INTO USER_SYSTEM
-    ( -- columns to insert data into
-     [documento], [nombre], [apellido]
-    )
-    VALUES
-    ( -- first row: values for the columns in the list above
-     @documento, @nombre, @apellido
-    )
-    GO
-    
-    SELECT CAST(SCOPE_IDENTITY() AS NVARCHAR);
-
-GO
-
 -- Create a new stored procedure called 'Insert_Pasante' in schema 'SolucionHabitacional'
 -- Drop the stored procedure if it already exists
 IF EXISTS (
 SELECT *
-    FROM INFORMATION_SCHEMA.ROUTINES
+FROM INFORMATION_SCHEMA.ROUTINES
 WHERE SPECIFIC_SCHEMA = N'SolucionHabitacional'
     AND SPECIFIC_NAME = N'Insert_Pasante'
 )
@@ -199,24 +142,23 @@ DROP PROCEDURE SolucionHabitacional.Insert_Pasante
 GO
 -- Create the stored procedure in the specified schema
 CREATE PROCEDURE SolucionHabitacional.Insert_Pasante
-    @documento [NVARCHAR] (24) = NULL,
     @userName [NVARCHAR] (254) = NULL,
     @userPassword [NVARCHAR] (254) = NULL
 AS
-    SET NOCOUNT ON;
+SET NOCOUNT ON;
 
-    -- Insert rows into table 'PASANTE'
-    INSERT INTO PASANTE
+-- Insert rows into table 'PASANTE'
+INSERT INTO PASANTE
     ( -- columns to insert data into
-     [documento], [userName], [userPassword]
+    [userName], [userPassword]
     )
-    VALUES
+VALUES
     ( -- first row: values for the columns in the list above
-     @documento, @userName, @userPassword
+        @userName, @userPassword
     )
     GO
-    
-    SELECT CAST(SCOPE_IDENTITY() AS NVARCHAR);
+
+SELECT CAST(SCOPE_IDENTITY() AS NVARCHAR);
 
 GO
 
@@ -224,7 +166,7 @@ GO
 -- Drop the stored procedure if it already exists
 IF EXISTS (
 SELECT *
-    FROM INFORMATION_SCHEMA.ROUTINES
+FROM INFORMATION_SCHEMA.ROUTINES
 WHERE SPECIFIC_SCHEMA = N'SolucionHabitacional'
     AND SPECIFIC_NAME = N'Insert_Parametro'
 )
@@ -233,23 +175,22 @@ GO
 -- Create the stored procedure in the specified schema
 CREATE PROCEDURE SolucionHabitacional.Insert_Parametro
     @nombre [NVARCHAR] (254) = NULL,
-    @valor [NVARCHAR] (254) = NULL, 
-    @fecha_vigencia DATETIME2 = NULL
+    @valor [NVARCHAR] (254) = NULL
 AS
-    SET NOCOUNT ON;
+SET NOCOUNT ON;
 
-    -- Insert rows into table 'PARAMETRO'
-    INSERT INTO PARAMETRO
+-- Insert rows into table 'PARAMETRO'
+INSERT INTO PARAMETRO
     ( -- columns to insert data into
-     [nombre], [valor], [fecha_vigencia]
+    [nombre], [valor]
     )
-    VALUES
+VALUES
     ( -- first row: values for the columns in the list above
-     @nombre, @valor, GETDATE()
+        @nombre, @valor
     )
     GO
 
-    SELECT CAST(SCOPE_IDENTITY() AS NVARCHAR);
+SELECT CAST(SCOPE_IDENTITY() AS NVARCHAR);
 
 GO
 
@@ -257,7 +198,7 @@ GO
 -- Drop the stored procedure if it already exists
 IF EXISTS (
 SELECT *
-    FROM INFORMATION_SCHEMA.ROUTINES
+FROM INFORMATION_SCHEMA.ROUTINES
 WHERE SPECIFIC_SCHEMA = N'SolucionHabitacional'
     AND SPECIFIC_NAME = N'Insert_Barrio'
 )
@@ -268,20 +209,20 @@ CREATE PROCEDURE SolucionHabitacional.Insert_Barrio
     @nombre [NVARCHAR] (254) = NULL,
     @descripcion [NVARCHAR] (254) = NULL
 AS
-    SET NOCOUNT ON;
+SET NOCOUNT ON;
 
-    -- Insert rows into table 'BARRIO'
-    INSERT INTO BARRIO
+-- Insert rows into table 'BARRIO'
+INSERT INTO BARRIO
     ( -- columns to insert data into
-     [nombre], [descripcion]
+    [nombre], [descripcion]
     )
-    VALUES
+VALUES
     ( -- first row: values for the columns in the list above
-     @nombre, @descripcion
+        @nombre, @descripcion
     )
     GO
 
-    SELECT CAST(SCOPE_IDENTITY() AS NVARCHAR);
+SELECT CAST(SCOPE_IDENTITY() AS NVARCHAR);
 
 GO
 
@@ -289,7 +230,7 @@ GO
 -- Drop the stored procedure if it already exists
 IF EXISTS (
 SELECT *
-    FROM INFORMATION_SCHEMA.ROUTINES
+FROM INFORMATION_SCHEMA.ROUTINES
 WHERE SPECIFIC_SCHEMA = N'SolucionHabitacional'
     AND SPECIFIC_NAME = N'Insert_Vivienda'
 )
@@ -305,26 +246,24 @@ CREATE PROCEDURE SolucionHabitacional.Insert_Vivienda
     @superficie DECIMAL (18, 4) = NULL,
     @anio_construccion INT = NULL,
     @precio_base DECIMAL (18, 4) = NULL,
-    @cotizacion DECIMAL (18, 4) = NULL,
-    @precio_final DECIMAL (18, 4) = NULL,
-    @habilitada CHAR (1) = NULL,
-    @vendida CHAR (1) = NULL,
+    @habilitada CHAR (1) = 'F',
+    @vendida CHAR (1) = 'F',
     @barrio [NVARCHAR] (254) = NULL
 AS
-    SET NOCOUNT ON;
-    
-    -- Insert rows into table 'VIVIENDA'
-    INSERT INTO VIVIENDA
+SET NOCOUNT ON;
+
+-- Insert rows into table 'VIVIENDA'
+INSERT INTO VIVIENDA
     ( -- columns to insert data into
-     [calle], [nro_puerta], [descripcion], [nro_banios], [nro_dormitorios], [superficie], [anio_construccion], [precio_base], [cotizacion], [precio_final], [habilitada], [vendida], [barrio]
+    [calle], [nro_puerta], [descripcion], [nro_banios], [nro_dormitorios], [superficie], [anio_construccion], [precio_base], [habilitada], [vendida], [barrio]
     )
-    VALUES
+VALUES
     ( -- first row: values for the columns in the list above
-     @calle, @nro_puerta, @descripcion, @nro_banios, @nro_dormitorios, @superficie, @anio_construccion, @precio_base,@cotizacion, @precio_final, @habilitada, @vendida, @barrio
+        @calle, @nro_puerta, @descripcion, @nro_banios, @nro_dormitorios, @superficie, @anio_construccion, @precio_base, @habilitada, @vendida, @barrio
     )
     GO
 
-    SELECT CAST(SCOPE_IDENTITY() AS NVARCHAR);
+SELECT CAST(SCOPE_IDENTITY() AS NVARCHAR);
 
 GO
 
@@ -332,7 +271,7 @@ GO
 -- Drop the stored procedure if it already exists
 IF EXISTS (
 SELECT *
-    FROM INFORMATION_SCHEMA.ROUTINES
+FROM INFORMATION_SCHEMA.ROUTINES
 WHERE SPECIFIC_SCHEMA = N'SolucionHabitacional'
     AND SPECIFIC_NAME = N'Insert_VNUEVA'
 )
@@ -340,11 +279,23 @@ DROP PROCEDURE SolucionHabitacional.Insert_VNUEVA
 GO
 -- Create the stored procedure in the specified schema
 CREATE PROCEDURE SolucionHabitacional.Insert_VNUEVA
-    
+    @vivienda [INT],
+    @precio_final [DECIMAL] (18, 2) = NULL
 AS
-    SET NOCOUNT ON;
+SET NOCOUNT ON;
 
-    SELECT CAST(SCOPE_IDENTITY() AS NVARCHAR);
+-- Insert rows into table 'VNUEVA'
+INSERT INTO VNUEVA
+    ( -- columns to insert data into
+    [vivienda], [precio_final]
+    )
+VALUES
+    ( -- first row: values for the columns in the list above
+        @vivienda, @precio_final
+    )
+    GO
+
+SELECT CAST(SCOPE_IDENTITY() AS NVARCHAR);
 
 GO
 
@@ -353,7 +304,7 @@ GO
 -- Drop the stored procedure if it already exists
 IF EXISTS (
 SELECT *
-    FROM INFORMATION_SCHEMA.ROUTINES
+FROM INFORMATION_SCHEMA.ROUTINES
 WHERE SPECIFIC_SCHEMA = N'SolucionHabitacional'
     AND SPECIFIC_NAME = N'Insert_VUSADA'
 )
@@ -361,38 +312,84 @@ DROP PROCEDURE SolucionHabitacional.Insert_VUSADA
 GO
 -- Create the stored procedure in the specified schema
 CREATE PROCEDURE SolucionHabitacional.Insert_VUSADA
-
+    @vivienda INT NOT NULL,
+    @precio_final DECIMAL (18, 4) NOT NULL,
+    @contribucion DECIMAL (18, 4)
 AS
-    SET NOCOUNT ON;
+SET NOCOUNT ON;
 
-    SELECT CAST(SCOPE_IDENTITY() AS NVARCHAR);
+-- Insert rows into table 'VUSADA'
+INSERT INTO VUSADA
+    ( -- columns to insert data into
+    [vivienda], [precio_final], [contribucion]
+    )
+VALUES
+    ( -- first row: values for the columns in the list above
+        vivienda, precio_final, @contribucion
+    )
+    GO
+
+SELECT CAST(SCOPE_IDENTITY() AS NVARCHAR);
 
 GO
 
--- Create a new stored procedure called 'Select_UserSystem' in schema 'SolucionHabitacional'
+-- Create a new stored procedure called 'Select_Pasante' in schema 'SolucionHabitacional'
 -- Drop the stored procedure if it already exists
 IF EXISTS (
 SELECT *
-    FROM INFORMATION_SCHEMA.ROUTINES
+FROM INFORMATION_SCHEMA.ROUTINES
 WHERE SPECIFIC_SCHEMA = N'SolucionHabitacional'
-    AND SPECIFIC_NAME = N'Select_UserSystem'
+    AND SPECIFIC_NAME = N'Select_Pasante'
 )
-DROP PROCEDURE SolucionHabitacional.Select_UserSystem
+DROP PROCEDURE SolucionHabitacional.Select_Pasante
 GO
 -- Create the stored procedure in the specified schema
-CREATE PROCEDURE SolucionHabitacional.Select_UserSystem
-    @documento [NVARCHAR] (24) = NULL
+CREATE PROCEDURE SolucionHabitacional.Select_Pasante
+    @userName [NVARCHAR] (254) = NULL
+AS
+SET NOCOUNT ON;
+IF (@userName = NULL)
+    BEGIN
+    -- Select rows from a Table or View 'PASANTE' in schema 'SolucionHabitacional'
+    SELECT *
+    FROM SolucionHabitacional.PASANTE;
+END
+    ELSE BEGIN
+    -- Select rows from a Table or View 'USER_SYSTEM' in schema 'SolucionHabitacional'
+    SELECT *
+    FROM SolucionHabitacional.PASANTE
+    WHERE userName = @userName;
+END
+    
+GO
+
+-- Create a new stored procedure called 'Select_Barrio' in schema 'SolucionHabitacional'
+-- Drop the stored procedure if it already exists
+IF EXISTS (
+SELECT *
+FROM INFORMATION_SCHEMA.ROUTINES
+WHERE SPECIFIC_SCHEMA = N'SolucionHabitacional'
+    AND SPECIFIC_NAME = N'Select_Barrio'
+)
+DROP PROCEDURE SolucionHabitacional.Select_Barrio
+GO
+-- Create the stored procedure in the specified schema
+CREATE PROCEDURE SolucionHabitacional.Select_Barrio
+    @nombre [NVARCHAR] (254) = NULL
 AS
     SET NOCOUNT ON;
-    IF (@documento = NULL)
-    BEGIN
-        -- Select rows from a Table or View 'USER_SYSTEM' in schema 'SolucionHabitacional'
-        SELECT * FROM SolucionHabitacional.USER_SYSTEM;
+    
+    IF (@nombre = NULL)
+        BEGIN
+        -- Select rows from a Table or View 'BARRIO' in schema 'SolucionHabitacional'
+        SELECT *
+        FROM SolucionHabitacional.BARRIO;
     END
     ELSE BEGIN
         -- Select rows from a Table or View 'USER_SYSTEM' in schema 'SolucionHabitacional'
-        SELECT * FROM SolucionHabitacional.USER_SYSTEM
-        WHERE documento = @documento;
+        SELECT *
+        FROM SolucionHabitacional.BARRIO
+        WHERE nombre = @nombre;
     END
-    
+    GO    
 GO

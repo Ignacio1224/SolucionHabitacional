@@ -8,10 +8,10 @@ using System.Data.SqlClient;
 
 namespace Solucion_Habitacional.Dominio.Utilidades
 {
-    class UtilidadesDB
+    public class UtilidadesDB
     {
 
-        private static string CadenaConexion = ConfigurationManager.ConnectionStrings["Solucion_Habitacional"].ConnectionString;
+        private static string CadenaConexion = ConfigurationManager.ConnectionStrings["Solucion_Habitacional_P"].ConnectionString;
 
         public static SqlConnection CreateConnection()
         {
@@ -39,5 +39,4 @@ namespace Solucion_Habitacional.Dominio.Utilidades
             return false;
         }
     }
-}
 }

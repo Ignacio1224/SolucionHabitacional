@@ -118,11 +118,11 @@ namespace Solucion_Habitacional.Dominio.Repositorios.ADO
             try
             {
                 var lista = FindAll();
-                using (System.IO.StreamWriter file = new System.IO.StreamWriter(@"..\..\..\Parametros.txt"))
+                using (System.IO.StreamWriter file = new System.IO.StreamWriter(@"..\..\..\..\Archivos\Parametros.txt"))
                 {
                     foreach (Parametro p in lista)
                     {
-                        file.WriteLine(p.ToString() + "#");
+                        file.Write(p.ToString() + "#");
                     }
                 }
 

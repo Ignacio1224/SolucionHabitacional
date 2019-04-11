@@ -3,72 +3,22 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Data.SqlClient;
 using System.Data;
 using Solucion_Habitacional.Dominio.Utilidades;
+using System.Data.SqlClient;
 using System.Diagnostics;
 
 namespace Solucion_Habitacional.Dominio
 {
-    public class Barrio : IEquatable<Barrio>, IActiveRecord 
+    public class Parametro : IEquatable<Parametro>, IActiveRecord
     {
-        public string nombre { get; set; }
-        public string descripcion { get; set; }
-
-        public Boolean Validar ()
-        {
-            return nombre != null && descripcion != null && nombre.Length > 0 && descripcion.Length > 0;
-        }
-
-        public Boolean Equals (Barrio other)
-        {
-            return other != null && this.nombre == other.nombre;
-        }
-
-        public override string ToString ()
-        {
-            return "Nombre: " + nombre + " - Descripción: " + descripcion;
-        }
-
-        public Boolean Insertar ()
-        {
-            Boolean flag = false;
-            String query = @"Insert_Barrio";
-            SqlConnection cn = UtilidadesDB.CreateConnection();
-            UtilidadesDB.OpenConnection(cn);
-            SqlTransaction trn = cn.BeginTransaction();
-
-            try
-            {
-                SqlCommand cmd = new SqlCommand(query, cn, trn);
-                cmd.CommandType = System.Data.CommandType.StoredProcedure;
-                cmd.Parameters.Add(new SqlParameter("@nombre", nombre));
-                cmd.Parameters.Add(new SqlParameter("@descripcion", descripcion));
-                flag = (int)cmd.ExecuteScalar() == 1;
-                trn.Commit();
-            }
-            catch (SqlException e)
-            {
-                trn.Rollback();
-                Console.WriteLine("Se ha producido un error " + e.Message);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Error" + ex.Message);
-            }
-            finally
-            {
-                UtilidadesDB.CloseConnection(cn);
-                cn.Dispose();
-            }
-
-            return flag;
-        }
+        public String nombre { get; set; }
+        public String valor { get; set; }
 
         public Boolean Eliminar()
         {
             Boolean flag = false;
-            String stringCommand = @"Delete_Barrio";
+            String stringCommand = @"Delete_Parametro";
 
             SqlConnection cn = UtilidadesDB.CreateConnection();
             UtilidadesDB.OpenConnection(cn);
@@ -99,10 +49,15 @@ namespace Solucion_Habitacional.Dominio
             return flag;
         }
 
-        public Boolean Modificar()
+        public Boolean Equals(Parametro other)
+        {
+            return nombre == other.nombre;
+        }
+
+        public Boolean Insertar()
         {
             Boolean flag = false;
-            String query = @"Update_Barrio";
+            String query = @"Insert_Parametro";
             SqlConnection cn = UtilidadesDB.CreateConnection();
             UtilidadesDB.OpenConnection(cn);
             SqlTransaction trn = cn.BeginTransaction();
@@ -112,7 +67,42 @@ namespace Solucion_Habitacional.Dominio
                 SqlCommand cmd = new SqlCommand(query, cn, trn);
                 cmd.CommandType = System.Data.CommandType.StoredProcedure;
                 cmd.Parameters.Add(new SqlParameter("@nombre", nombre));
-                cmd.Parameters.Add(new SqlParameter("@descripcion", descripcion));
+                cmd.Parameters.Add(new SqlParameter("@valor", valor));
+                flag = (int)cmd.ExecuteScalar() == 1;
+                trn.Commit();
+            }
+            catch (SqlException e)
+            {
+                trn.Rollback();
+                Console.WriteLine("Se ha producido un error " + e.Message);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error" + ex.Message);
+            }
+            finally
+            {
+                UtilidadesDB.CloseConnection(cn);
+                cn.Dispose();
+            }
+
+            return flag;
+        }
+
+        public Boolean Modificar()
+        {
+            Boolean flag = false;
+            String query = @"Update_Parametro";
+            SqlConnection cn = UtilidadesDB.CreateConnection();
+            UtilidadesDB.OpenConnection(cn);
+            SqlTransaction trn = cn.BeginTransaction();
+
+            try
+            {
+                SqlCommand cmd = new SqlCommand(query, cn, trn);
+                cmd.CommandType = System.Data.CommandType.StoredProcedure;
+                cmd.Parameters.Add(new SqlParameter("@nombre", nombre));
+                cmd.Parameters.Add(new SqlParameter("@valor", valor));
 
                 flag = (int)cmd.ExecuteScalar() == 1;
                 trn.Commit();
@@ -135,5 +125,14 @@ namespace Solucion_Habitacional.Dominio
             return flag;
         }
 
+        public override string ToString()
+        {
+            return nombre + "=" + valor;
+        }
+
+        public Boolean Validar()
+        {
+            return nombre != null && nombre.Length > 0 && valor != null && valor.Length > 0;
+        }
     }
 }

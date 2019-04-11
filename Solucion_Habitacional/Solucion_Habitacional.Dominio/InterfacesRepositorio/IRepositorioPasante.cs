@@ -14,11 +14,9 @@ namespace Solucion_Habitacional.Dominio.InterfacesRepositorio
 
         Boolean Update(Pasante p);
 
-        Barrio FindByName(string nombre);
+        Pasante FindByName(string nombre);
 
         IEnumerable<Pasante> FindAll();
-
-        Boolean GenerateReports();
 
         Boolean Ingresar(Pasante p);
     }

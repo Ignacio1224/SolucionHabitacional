@@ -13,6 +13,8 @@ namespace Solucion_Habitacional
     {
         static RepositorioBarrio repoBarrio = new RepositorioBarrio();
         static RepositorioPasante repoPasante = new RepositorioPasante();
+        static RepositorioParametro repoParametro = new RepositorioParametro();
+
         static Boolean autenticado = false;
         static Pasante pasante = null;
 
@@ -37,98 +39,98 @@ namespace Solucion_Habitacional
 
 
         #region PASANTE
-        private static Boolean Ingresar()
+        private static void Ingresar(Boolean salt = false)
         {
-            String msj;
-            String username;
-            String passw;
+            Boolean canceled = false;
+            String user_name = "", password = "";
 
-            if (pasante == null)
+            Console.WriteLine("\nIngresar");
+
+            while (pasante == null && !canceled)
             {
-                Console.WriteLine("\nIngresar");
+                user_name = CompleteField("Email", true);
 
-                Console.WriteLine("\nUsuario: [0 --> Salir]");
-                username = Console.ReadLine();
+                canceled = user_name == "";
 
-                if (username == "0") return Salir();
-
-                Console.WriteLine("\nContrasena: ");
-                passw = Console.ReadLine();
-
-                pasante = new Pasante
+                if (canceled)
                 {
-                    user_name = username,
-                    password = passw
-                };
-            }
-
-            autenticado = repoPasante.Ingresar(pasante);
-
-            if (autenticado)
-            {
-                Console.WriteLine("Ingreso correcto");
-                PararPantalla();
-                DibujarMenu();
-            }
-            else
-            {
-                pasante = null;
-                Console.WriteLine("Intente nuevamente, recuerde que los campos no pueden estar vacios.");
-                PararPantalla();
-                Ingresar();
-            }
-            return true;
-        }
-
-        private static Boolean AgregarPasante()
-        {
-            Boolean added = false;
-            String passw1 = "a";
-            String passw2 = "b";
-            String user_name = "";
-
-            Console.WriteLine("\nRegistrarme");
-
-            Console.WriteLine("\nEmail: [0 --> Salir]");
-            user_name = Console.ReadLine();
-
-            if (user_name == "0") return Salir();
-
-            while (passw1 != passw2)
-            {
-                Console.WriteLine("\nContrasena: ");
-                passw1 = Console.ReadLine();
-                Console.WriteLine("\nContrasena: ");
-                passw2 = Console.ReadLine();
-
-                if (passw1 != passw2)
+                    CanceledOperation();
+                }
+                else
                 {
-                    Console.WriteLine("\n\nLas contrasenas no coinciden, Intente de nuevo!");
-                    PararPantalla();
+                    password = CompleteField("Contraseña", false);
+
+                    pasante = new Pasante
+                    {
+                        user_name = user_name,
+                        password = password
+                    };
                 }
             }
 
-            pasante = new Pasante
+            
+            if (pasante != null)
             {
-                user_name = user_name,
-                password = passw2
-            };
-
-            added = repoPasante.Add(pasante);
-
-            if (added)
-            {
-                Console.WriteLine("\nRegistro correcto!");
-                Ingresar();
+                autenticado = repoPasante.Ingresar(pasante);
+                if (!salt)
+                {
+                    EvaluateOperation(autenticado, "Ingreso", "usuario", "nombre de usuario", true, true, true, true);
+                }
             }
-            else
-            {
-                Console.WriteLine("\nRegistro incorrecto, Vuelva a intentarlo, recuerde no dejar campos vacios");
-                PararPantalla();
-                AgregarPasante();
-            }
-            return true;
         }
+
+        private static void AgregarPasante()
+        {
+            Boolean added = false, canceled = false;
+            String name = "", password1 = "a", password2 = "b";
+
+            Console.WriteLine("\nRegistrarme");
+
+
+            while (!added && !canceled && password1 != password2)
+            {
+                name = CompleteField("Email", true);
+                canceled = name == "";
+
+                if (canceled)
+                {
+                    CanceledOperation();
+                }
+                else
+                {
+                    password1 = CompleteField("Contraseña", false);
+                    password2 = CompleteField("Contraseña", false);
+
+                    if (password1 != password2)
+                    {
+                        Console.WriteLine("\nLas contrasenas no coinciden, intente de nuevo!\n\n");
+                    }
+                    else
+                    {
+                        pasante = new Pasante
+                        {
+                            user_name = name,
+                            password = password2
+                        };
+
+                        added = repoPasante.Add(pasante);
+
+                        EvaluateOperation(added, "Registro", "usuario", "email", false, true, true, true);
+
+                        if (!added)
+                        {
+                            password1 = "a";
+                            password2 = "b";
+                        } else
+                        {
+                            Ingresar(true);
+                        }
+                    }
+                }
+            }
+        }
+
+        /* CODE TASK! Apply restructured logic to Modificar Pasante and Elimiar Pasante and Parameters */
 
         private static Boolean ModificarPasante()
         {
@@ -144,7 +146,7 @@ namespace Solucion_Habitacional
                 Console.WriteLine("\nContrasena: [0 --> Salir]");
                 passw1 = Console.ReadLine();
 
-                if (passw2 == "0") return Salir();
+                if (passw1 == "0") return Salir();
 
 
                 Console.WriteLine("\nContrasena: ");
@@ -164,6 +166,7 @@ namespace Solucion_Habitacional
             };
 
             modificado = repoPasante.Update(pasante);
+
             if (modificado)
             {
                 Console.WriteLine("\nModificacion correcta!");
@@ -219,25 +222,37 @@ namespace Solucion_Habitacional
         #endregion
 
         #region BARRIO
-        private static Boolean AgregarBarrio()
+        private static void AgregarBarrio()
         {
+            Boolean added = false, canceled = false;
+            String name = "", desc = "";
+
             Console.WriteLine("\nAgregar un Barrio");
-            Console.WriteLine("\nNombre: [0 --> Salir]");
-            String name = Console.ReadLine();
 
-            if (name == "0") return Salir();
-
-            Console.WriteLine("\nDescripcion: ");
-            String desc = Console.ReadLine();
-            repoBarrio.Add(new Barrio
+            while (!added && !canceled)
             {
-                nombre = name,
-                descripcion = desc
-            });
+                name = CompleteField("Nombre", true);
 
-            PararPantalla();
-            return true;
+                canceled = name == "";
 
+                if (canceled)
+                {
+                    CanceledOperation();
+                }
+                else
+                {
+                    desc = CompleteField("Descripcion", false);
+
+                    added = repoBarrio.Add(new Barrio
+                    {
+                        nombre = name,
+                        descripcion = desc
+                    });
+
+                    EvaluateOperation(added, "Ingreso", "barrio", "nombre", false, true, true, true);
+
+                }
+            }
         }
 
         private static void ListarBarrios()
@@ -248,57 +263,162 @@ namespace Solucion_Habitacional
             PararPantalla();
         }
 
-        private static Boolean ModificarBarrio()
+        private static void ModificarBarrio()
+        {
+            Boolean modified = false, canceled = false;
+            String name = "", desc = "";
+
+            Console.WriteLine("\nModificar Barrio");
+
+            while (!modified && !canceled)
+            {
+                name = CompleteField("Nombre", true);
+
+                canceled = name == "";
+
+                if (canceled)
+                {
+                    CanceledOperation();
+                }
+                else
+                {
+                    desc = CompleteField("Descripcion", false);
+
+                    modified = repoBarrio.Update(new Barrio
+                    {
+                        nombre = name,
+                        descripcion = desc
+                    });
+
+                    EvaluateOperation(modified, "Modificación", "barrio", "nombre", true, true, true, true);
+
+                }
+            }
+
+        }
+
+        private static void EliminarBarrio()
+        {
+            Boolean deleted = false, canceled = false;
+            String name = "";
+
+            Console.WriteLine("\nEliminar un Barrio");
+
+            while (!deleted && !canceled)
+            {
+                name = CompleteField("Nombre", true);
+
+                canceled = name == "";
+
+                if (canceled)
+                {
+                    CanceledOperation();
+                }
+                else
+                {
+                    deleted = repoBarrio.Delete(new Barrio
+                    {
+                        nombre = name,
+                        descripcion = null
+                    });
+
+                    EvaluateOperation(deleted, "Eliminación", "barrio", "nombre", true, true, true, true);
+
+                }
+            }
+        }
+
+        private static void GenerarReporteBarrio()
+        {
+            Console.WriteLine("\nGenerar Reporte de Barrios");
+            Boolean generado = repoBarrio.GenerateReports();
+
+            if (generado)
+            {
+                Console.WriteLine("\nGenerado exitosamente!");
+            }
+            else
+            {
+                Console.WriteLine("\nOooops! Ha ocurrido un error");
+            }
+
+            PararPantalla();
+        }
+
+        #endregion
+
+        #region Parametro
+
+        private static Boolean AgregarParametro()
+        {
+            Console.WriteLine("\nAgregar un Parametro");
+            Console.WriteLine("\nNombre: [0 --> Salir]");
+            String name = Console.ReadLine();
+
+            if (name == "0") return Salir();
+
+            Console.WriteLine("\nValor: ");
+            String valor = Console.ReadLine();
+            repoParametro.Add(new Parametro
+            {
+                nombre = name,
+                valor = valor
+            });
+
+            PararPantalla();
+            return true;
+        }
+
+        private static Boolean ModificarParametro()
         {
             Boolean modified = false;
             String nombre = null;
-            String descripcion = null;
+            String valor = null;
 
-            Console.WriteLine("\nModificar Barrio");
+            Console.WriteLine("\nModificar Parametro");
 
             Console.WriteLine("\nNombre: [0 --> Salir]");
             nombre = Console.ReadLine();
 
-            Console.WriteLine("\nDescripcion:");
-            descripcion = Console.ReadLine();
+            Console.WriteLine("\nValor:");
+            valor = Console.ReadLine();
 
-            if (descripcion == "0") return Salir();
+            if (valor == "0") return Salir();
 
-            if (nombre == "" || descripcion == "")
+            if (nombre == "" || valor == "")
             {
                 Console.WriteLine("\n\nLos campos no pueden estar vacios, Intente de nuevo!");
                 PararPantalla();
-                ModificarBarrio();
+                ModificarParametro();
             }
 
-            modified = repoBarrio.Update(new Barrio
+            modified = repoParametro.Update(new Parametro
             {
                 nombre = nombre,
-                descripcion = descripcion
+                valor = valor
             });
 
             if (modified)
             {
-                Console.WriteLine("\nAniadido Correctamente!");
+                Console.WriteLine("\nModificado Correctamente!");
                 PararPantalla();
                 DibujarMenu();
             }
             else
             {
-                Console.WriteLine("\nOoops! \n\tHa ocurrido un error, asegurate que el barrio exista, Intente nuevamente!");
+                Console.WriteLine("\nOoops! \n\tHa ocurrido un error, asegurate que el parametro exista, Intente nuevamente!");
                 PararPantalla();
-                ModificarPasante();
+                ModificarParametro();
             }
 
             return true;
-
         }
 
-        private static Boolean EliminarBarrio()
+        private static Boolean EliminarParametro()
         {
             Boolean deleted = false;
 
-            Console.WriteLine("\nEliminar un Barrio");
+            Console.WriteLine("\nEliminar un Parametro");
 
             while (!deleted)
             {
@@ -307,32 +427,61 @@ namespace Solucion_Habitacional
 
                 if (name == "0") return Salir();
 
-                deleted = repoBarrio.Delete(new Barrio
+                deleted = repoParametro.Delete(new Parametro
                 {
                     nombre = name,
-                    descripcion = null
+                    valor = null
                 });
 
                 if (!deleted)
                 {
-                    Console.WriteLine("El barrio no se pudo eliminar, verifique que el barrio exista");
+                    Console.WriteLine("El parametro no se pudo eliminar, verifique que exista");
                     PararPantalla();
-                    EliminarBarrio();
-                } else
+                    EliminarParametro();
+                }
+                else
                 {
-                    Console.WriteLine("El barrio se ha eliminado!");
+                    Console.WriteLine("El parametro se ha eliminado!");
                     PararPantalla();
                 }
             }
 
-
-
             return true;
+        }
+
+        private static void ListarParametros()
+        {
+            Console.WriteLine("\nListar Parametros");
+            var lista = repoParametro.FindAll();
+            MostrarLista(lista);
+            PararPantalla();
+        }
+
+        private static Boolean ListarParametro()
+        {
+            return true;
+        }
+
+        private static void GenerarReporteParametro()
+        {
+            Console.WriteLine("\nGenerar Reporte de Parametros");
+            Boolean generado = repoParametro.GenerateReports();
+
+            if (generado)
+            {
+                Console.WriteLine("\nGenerado exitosamente!");
+            }
+            else
+            {
+                Console.WriteLine("\nOooops! Ha ocurrido un error");
+            }
+
+            PararPantalla();
         }
 
         #endregion
 
-        #region VISUAL
+        #region UTILITIES
         private static void DibujarMenu()
         {
             Console.Clear();
@@ -438,6 +587,34 @@ namespace Solucion_Habitacional
                     EliminarBarrio();
                     break;
 
+                case 6:
+                    GenerarReporteBarrio();
+                    break;
+
+                case 13:
+                    AgregarParametro();
+                    break;
+
+                case 14:
+                    ModificarParametro();
+                    break;
+
+                case 15:
+                    ListarParametros();
+                    break;
+
+                case 16:
+                    EliminarParametro();
+                    break;
+
+                case 17:
+                    ListarParametro();
+                    break;
+
+                case 18:
+                    GenerarReporteParametro();
+                    break;
+
                 case 19:
                     ModificarPasante();
                     break;
@@ -474,6 +651,53 @@ namespace Solucion_Habitacional
             return true;
             //Environment.Exit(0);
         }
+
+        private static String CompleteField(String message, Boolean salir)
+        {
+            String field = "";
+
+            while (field == null || field == "")
+            {
+
+                if (salir)
+                {
+                    Console.WriteLine("[0 --> Salir]");
+                }
+
+                Console.WriteLine("\n" + message + ": ");
+                field = Console.ReadLine();
+
+                if (salir && field == "0") return "";
+
+                if (field == null || field == "")
+                {
+                    Console.WriteLine("\n\nOooops\n\tEl campo no puede estar vacío\n\tIngréselo nuevamente");
+                }
+            }
+            return field;
+        }
+
+        private static void CanceledOperation()
+        {
+            Console.Clear();
+            Console.WriteLine("\nOperación cancelada!");
+            PararPantalla();
+        }
+
+        private static void EvaluateOperation(Boolean op, String operation, String obj, String id, Boolean exists_obj, Boolean gen_op, Boolean gen_obj, Boolean gen_id)
+        {
+            if (op)
+            {
+                Console.WriteLine("\n" + operation + " correct" + (gen_op ? "o" : "a") + "!");
+                PararPantalla();
+            }
+            else
+            {
+                Console.WriteLine("\n" + operation + " incorrect" + (gen_op ? "o" : "a") + ", asegurese de que" + (exists_obj ? " " : " no ") + "exista" + (gen_obj ? " un " : " una ") + obj + " con" + (gen_id ? " el mismo " : " la misma ") + id + " y vuelva a intentarlo");
+                PararPantalla();
+            }
+        }
+
         #endregion
     }
 }

@@ -14,7 +14,7 @@ namespace Solucion_Habitacional.Dominio.InterfacesRepositorio
 
         Boolean Update(Vivienda vi);
 
-        Barrio FindByLocation(String street, int num);
+        Vivienda FindByLocation(String street, int num);
 
         IEnumerable<Vivienda> FindAll();
 

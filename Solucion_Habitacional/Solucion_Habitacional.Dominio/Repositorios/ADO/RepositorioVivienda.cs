@@ -23,7 +23,7 @@ namespace Solucion_Habitacional.Dominio.Repositorios.ADO
             throw new NotImplementedException();
         }
 
-        public Barrio FindByLocation(string street, int num)
+        public Vivienda FindByLocation(string street, int num)
         {
             throw new NotImplementedException();
         }

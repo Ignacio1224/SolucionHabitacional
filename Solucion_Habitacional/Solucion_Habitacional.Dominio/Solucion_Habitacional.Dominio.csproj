@@ -67,6 +67,7 @@
     <Compile Include="InterfacesRepositorio\IRepositorioParametro.cs" />
     <Compile Include="InterfacesRepositorio\IRepositorioPasante.cs" />
     <Compile Include="InterfacesRepositorio\IRepositorioVivienda.cs" />
+    <Compile Include="Parametro.cs" />
     <Compile Include="Pasante.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Repositorios\ADO\RepositorioBarrio.cs" />

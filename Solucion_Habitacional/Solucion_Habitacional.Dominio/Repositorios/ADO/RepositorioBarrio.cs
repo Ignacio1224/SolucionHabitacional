@@ -53,6 +53,7 @@ namespace Solucion_Habitacional.Dominio.Repositorios.ADO
                         };
                     }
                 }
+                dr.Close();
             }
             catch (SqlException e)
             {
@@ -95,9 +96,7 @@ namespace Solucion_Habitacional.Dominio.Repositorios.ADO
                         });
                     }
                 }
-
-                UtilidadesDB.CloseConnection(cn);
-
+                dr.Close();
             }
             catch (SqlException e)
             {

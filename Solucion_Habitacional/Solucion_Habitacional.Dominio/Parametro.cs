@@ -132,7 +132,7 @@ namespace Solucion_Habitacional.Dominio
 
         public Boolean Validar()
         {
-            return nombre != null && nombre.Length > 0 && valor != null && valor.Length > 0;
+            return nombre != null && nombre.Length > 0;
         }
     }
 }

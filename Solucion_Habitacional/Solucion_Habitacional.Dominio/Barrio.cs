@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using System.Data.SqlClient;
 using System.Data;
 using Solucion_Habitacional.Dominio.Utilidades;
-using System.Diagnostics;
 
 namespace Solucion_Habitacional.Dominio
 {
@@ -85,11 +84,11 @@ namespace Solucion_Habitacional.Dominio
             catch (SqlException ex)
             {
                 trn.Rollback();
-                Debug.WriteLine("Error al Eliminar " + ex.Message);
+                Console.WriteLine("Error al Eliminar " + ex.Message);
             }
             catch (Exception ex)
             {
-                Debug.WriteLine("Otro Error " + ex.Message);
+                Console.WriteLine("Otro Error " + ex.Message);
             }
             finally
             {

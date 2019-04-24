@@ -14,6 +14,7 @@ namespace Solucion_Habitacional
         static RepositorioBarrio repoBarrio = new RepositorioBarrio();
         static RepositorioPasante repoPasante = new RepositorioPasante();
         static RepositorioParametro repoParametro = new RepositorioParametro();
+        static RepositorioVivienda repoVivienda = new RepositorioVivienda();
 
         static Boolean autenticado = false;
         static Pasante pasante = null;
@@ -48,9 +49,9 @@ namespace Solucion_Habitacional
 
             while (!added && !canceled)
             {
-                name = CompleteField("Nombre", true);
+                name = (String) CompleteField("Nombre", true);
 
-                canceled = name == "";
+                canceled = name == "-1";
 
                 if (canceled)
                 {
@@ -58,7 +59,7 @@ namespace Solucion_Habitacional
                 }
                 else
                 {
-                    valor = CompleteField("Valor", false);
+                    valor = (String) CompleteField("Valor", false);
 
                     added = repoParametro.Add(new Parametro
                     {
@@ -81,9 +82,9 @@ namespace Solucion_Habitacional
 
             while (!modified && !canceled)
             {
-                name = CompleteField("Nombre", true);
+                name = (String) CompleteField("Nombre", true);
 
-                canceled = name == "";
+                canceled = name == "-1";
 
                 if (canceled)
                 {
@@ -91,7 +92,7 @@ namespace Solucion_Habitacional
                 }
                 else
                 {
-                    valor = CompleteField("Valor", false);
+                    valor = (String) CompleteField("Valor", false);
 
                     modified = repoParametro.Update(new Parametro
                     {
@@ -114,9 +115,9 @@ namespace Solucion_Habitacional
 
             while (!deleted && !canceled)
             {
-                name = CompleteField("Nombre", true);
+                name = (String) CompleteField("Nombre", true);
 
-                canceled = name == "";
+                canceled = name == "-1";
 
                 if (canceled)
                 {
@@ -127,7 +128,7 @@ namespace Solucion_Habitacional
                     deleted = repoParametro.Delete(new Parametro
                     {
                         nombre = name,
-                        valor = null
+                        valor = ""
                     });
 
                     EvaluateOperation(deleted, "Eliminación", "parámetro", "nombre", true, false, true, true);
@@ -152,9 +153,9 @@ namespace Solucion_Habitacional
 
             while (!founded && !canceled && p == null)
             {
-                name = CompleteField("Nombre", true);
+                name = (String) CompleteField("Nombre", true);
 
-                canceled = name == "";
+                canceled = name == "-1";
 
                 if (canceled)
                 {
@@ -209,9 +210,9 @@ namespace Solucion_Habitacional
             {
                 if (pasante == null)
                 {
-                    user_name = CompleteField("Email", true);
+                    user_name = (String) CompleteField("Email", true);
 
-                    canceled = user_name == "";
+                    canceled = user_name == "-1";
 
                     if (canceled)
                     {
@@ -219,7 +220,7 @@ namespace Solucion_Habitacional
                     }
                     else
                     {
-                        password = CompleteField("Contraseña", false);
+                        password = (String) CompleteField("Contraseña", false);
 
                         pasante = new Pasante
                         {
@@ -256,8 +257,8 @@ namespace Solucion_Habitacional
 
             while (!added && !canceled && password1 != password2)
             {
-                name = CompleteField("Email", true);
-                canceled = name == "";
+                name = (String) CompleteField("Email", true);
+                canceled = name == "-1";
 
                 if (canceled)
                 {
@@ -265,8 +266,8 @@ namespace Solucion_Habitacional
                 }
                 else
                 {
-                    password1 = CompleteField("Contraseña", false);
-                    password2 = CompleteField("Contraseña", false);
+                    password1 = (String) CompleteField("Contraseña", false);
+                    password2 = (String) CompleteField("Contraseña", false);
 
                     if (password1 != password2)
                     {
@@ -308,9 +309,9 @@ namespace Solucion_Habitacional
             while (!modified && !canceled && password1 != password2)
             {
 
-                password1 = CompleteField("Contraseña", true);
+                password1 = (String) CompleteField("Contraseña", true);
 
-                canceled = password1 == "";
+                canceled = password1 == "-1";
 
                 if (canceled)
                 {
@@ -318,7 +319,7 @@ namespace Solucion_Habitacional
                 }
                 else
                 {
-                    password2 = CompleteField("Contraseña", false);
+                    password2 = (String) CompleteField("Contraseña", false);
 
                     if (password1 != password2)
                     {
@@ -357,9 +358,9 @@ namespace Solucion_Habitacional
 
             while (!deleted && !canceled)
             {
-                password = CompleteField("Contraseña", true);
+                password = (String) CompleteField("Contraseña", true);
 
-                canceled = password == "";
+                canceled = password == "-1";
 
                 if (canceled)
                 {
@@ -398,9 +399,9 @@ namespace Solucion_Habitacional
 
             while (!added && !canceled)
             {
-                name = CompleteField("Nombre", true);
+                name = (String) CompleteField("Nombre", true);
 
-                canceled = name == "";
+                canceled = name == "-1";
 
                 if (canceled)
                 {
@@ -408,7 +409,7 @@ namespace Solucion_Habitacional
                 }
                 else
                 {
-                    desc = CompleteField("Descripcion", false);
+                    desc = (String) CompleteField("Descripcion", false);
 
                     added = repoBarrio.Add(new Barrio
                     {
@@ -422,12 +423,16 @@ namespace Solucion_Habitacional
             }
         }
 
-        private static void ListarBarrios()
+        private static void ListarBarrios(Boolean cont = true)
         {
             Console.WriteLine("\nListar Barrios");
             var lista = repoBarrio.FindAll();
             MostrarLista(lista);
-            PararPantalla();
+
+            if (cont)
+            {
+                PararPantalla();
+            }
         }
 
         private static void ListarBarrio()
@@ -438,9 +443,9 @@ namespace Solucion_Habitacional
 
             while (!founded && !canceled && b == null)
             {
-                name = CompleteField("Nombre", true);
+                name = (String) CompleteField("Nombre", true);
 
-                canceled = name == "";
+                canceled = name == "-1";
 
                 if (canceled)
                 {
@@ -456,8 +461,9 @@ namespace Solucion_Habitacional
                     {
                         Console.WriteLine("\n\tNo se ha encontrado nungún barrio con el nombre: " + name);
                     }
-
+                    
                     PararPantalla();
+                    
                 }
             }
 
@@ -472,9 +478,9 @@ namespace Solucion_Habitacional
 
             while (!modified && !canceled)
             {
-                name = CompleteField("Nombre", true);
+                name = (String) CompleteField("Nombre", true);
 
-                canceled = name == "";
+                canceled = name == "-1";
 
                 if (canceled)
                 {
@@ -482,7 +488,7 @@ namespace Solucion_Habitacional
                 }
                 else
                 {
-                    desc = CompleteField("Descripcion", false);
+                    desc = (String) CompleteField("Descripcion", false);
 
                     modified = repoBarrio.Update(new Barrio
                     {
@@ -506,9 +512,9 @@ namespace Solucion_Habitacional
 
             while (!deleted && !canceled)
             {
-                name = CompleteField("Nombre", true);
+                name = (String) CompleteField("Nombre", true);
 
-                canceled = name == "";
+                canceled = name == "-1";
 
                 if (canceled)
                 {
@@ -551,15 +557,22 @@ namespace Solucion_Habitacional
         private static void AgregarVivienda()
         {
             Boolean added = false, canceled = false;
-            String name = "", desc = "";
 
-            Console.WriteLine("\nAgregar un Barrio");
+            int current_year = DateTime.Now.Year;
+            int anio_es_nueva = Convert.ToInt16(repoParametro.FindByName("anio_nueva").valor) | 2;
+
+            String calle = "", descripcion = "";
+            Barrio barrio = null;
+            int nro_puerta = 0, nro_banios = 0, nro_dormitorios = 0, anio_construccion = 0;
+            double superficie = 0.0, precio_base = 0.0;
+            Boolean vendida = false, habilitada = false, intenta_ser_nueva = false;
+
+            Console.WriteLine("\nAgregar una Vivienda");
 
             while (!added && !canceled)
             {
-                name = CompleteField("Nombre", true);
-
-                canceled = name == "";
+                calle = (String) CompleteField("Calle", true);
+                canceled = calle == "-1";
 
                 if (canceled)
                 {
@@ -567,24 +580,141 @@ namespace Solucion_Habitacional
                 }
                 else
                 {
-                    desc = CompleteField("Descripcion", false);
+                   
+                    nro_puerta = Convert.ToInt32(CompleteField("Número de puerta", false, "Int"));
 
-                    added = repoBarrio.Add(new Barrio
+                    nro_banios = Convert.ToInt32(CompleteField("Cantidad de baños", false, "Int"));
+
+                    nro_dormitorios = Convert.ToInt32(CompleteField("Cantidad de dormitorios", false, "Int"));
+
+                    anio_construccion = Convert.ToInt32(CompleteField("Año de construcción", false, "Int"));
+
+                    superficie = Convert.ToDouble(CompleteField("Superficie en m2", false, "Double"));
+
+                    intenta_ser_nueva = current_year - anio_construccion < anio_es_nueva;
+
+                    if (intenta_ser_nueva)
                     {
-                        nombre = name,
-                        descripcion = desc
-                    });
+                        Console.Write("\nEl precio es en Unidades Indexadas");
+                    } else
+                    {
+                        Console.Write("\nEl precio es en Dólares");
+                    }
 
-                    EvaluateOperation(added, "Ingreso", "barrio", "nombre", false, true, true, true);
+                    precio_base = Convert.ToDouble(CompleteField("Precio base", false, "Double"));
 
+                    habilitada = Convert.ToBoolean(CompleteField("Está habilitada? [s --> Si, n --> No]", false, "Boolean"));
+
+                    if (habilitada)
+                    {
+                        vendida = Convert.ToBoolean(CompleteField("Está vendida? [s --> Si, n --> No]", false, "Boolean"));
+                    }
+
+                    descripcion = (String)CompleteField("Descripcion", false);
+
+                    barrio = (Barrio) CompleteField("Nombre del barrio", false, "Barrio");
+
+                    if (intenta_ser_nueva)
+                    {
+                        added = AddVNueva(calle, nro_puerta, barrio, descripcion, nro_banios,
+                                nro_dormitorios, superficie, precio_base, anio_construccion, vendida,
+                                habilitada);
+
+                        if (!added)
+                        {
+                            added = AddVNueva(calle, nro_puerta, barrio, descripcion, nro_banios,
+                                nro_dormitorios, superficie, precio_base, anio_construccion, vendida,
+                                habilitada);
+                        }
+                    } else
+                    {
+                        added = AddUsada(calle, nro_puerta, barrio, descripcion, nro_banios,
+                                nro_dormitorios, superficie, precio_base, anio_construccion, vendida,
+                                habilitada);
+
+                        if (!added)
+                        {
+                            added = AddVNueva(calle, nro_puerta, barrio, descripcion, nro_banios,
+                                nro_dormitorios, superficie, precio_base, anio_construccion, vendida, 
+                                habilitada);
+                        }
+                    }
+
+                    if (added)
+                    {
+                        Console.WriteLine("Ingreso correcto");
+                    } else
+                    {
+                        Console.WriteLine("Ingreso incorrecto, Vuelva a intentarlo");
+                    }
+
+                    PararPantalla();
                 }
             }
+        }
+
+        private static Boolean AddVNueva(String calle, int nro_puerta, Barrio barrio, 
+            String descripcion, int nro_banios, int nro_dormitorios, 
+            double superficie, double precio_base, int anio_construccion,
+            Boolean vendida, Boolean habilitada)
+        {
+            Boolean added = false;
+            VNueva v = new VNueva
+            {
+                calle = calle,
+                nro_puerta = nro_puerta,
+                barrio = barrio,
+                descripcion = descripcion,
+                nro_banios = nro_banios,
+                nro_dormitorios = nro_dormitorios,
+                superficie = superficie,
+                precio_base = precio_base,
+                anio_construccion = anio_construccion,
+                vendida = vendida,
+                habilitada = habilitada
+            };
+
+            if (v.Es_Nueva())
+            {
+                added = repoVivienda.Add(v);
+            }
+
+            return added;
+        }
+
+        private static Boolean AddUsada(String calle, int nro_puerta, Barrio barrio,
+            String descripcion, int nro_banios, int nro_dormitorios,
+            double superficie, double precio_base, int anio_construccion,
+            Boolean vendida, Boolean habilitada)
+        {
+            Boolean added = false;
+            VUsada v = new VUsada
+            {
+                calle = calle,
+                nro_puerta = nro_puerta,
+                barrio = barrio,
+                descripcion = descripcion,
+                nro_banios = nro_banios,
+                nro_dormitorios = nro_dormitorios,
+                superficie = superficie,
+                precio_base = precio_base,
+                anio_construccion = anio_construccion,
+                vendida = vendida,
+                habilitada = habilitada
+            };
+
+            if (!v.Es_Nueva())
+            {
+                added = repoVivienda.Add(v);
+            }
+
+            return added;
         }
 
         private static void ListarViviendas()
         {
             Console.WriteLine("\nListar Barrios");
-            var lista = repoBarrio.FindAll();
+            var lista = repoVivienda.FindAll();
             MostrarLista(lista);
             PararPantalla();
         }
@@ -595,11 +725,13 @@ namespace Solucion_Habitacional
             String name = "";
             Barrio b = null;
 
+            
+
             while (!founded && !canceled && b == null)
             {
-                name = CompleteField("Nombre", true);
+                name = (String) CompleteField("Nombre del barrio", true);
 
-                canceled = name == "";
+                canceled = name == "-1";
 
                 if (canceled)
                 {
@@ -611,7 +743,7 @@ namespace Solucion_Habitacional
 
                     if (b != null)
                     {
-                        Console.WriteLine("\n\tSe ha encontrado 1 barrio: " + b.ToString());
+                        MostrarLista(repoVivienda.FindByLocation(b));
                     }
                     else
                     {
@@ -627,15 +759,15 @@ namespace Solucion_Habitacional
         private static void ModificarVivienda()
         {
             Boolean modified = false, canceled = false;
-            String name = "", desc = "";
+            int id = -1;
 
-            Console.WriteLine("\nModificar Barrio");
+            Console.WriteLine("\nModificar Vivienda");
 
             while (!modified && !canceled)
             {
-                name = CompleteField("Nombre", true);
+                id = (int) CompleteField("Id", true, "Int");
 
-                canceled = name == "";
+                canceled = id == -1;
 
                 if (canceled)
                 {
@@ -643,16 +775,124 @@ namespace Solucion_Habitacional
                 }
                 else
                 {
-                    desc = CompleteField("Descripcion", false);
+                    Vivienda v = repoVivienda.FindById(id);
 
-                    modified = repoBarrio.Update(new Barrio
+                    int op = -1;
+
+                    while (!canceled)
                     {
-                        nombre = name,
-                        descripcion = desc
-                    });
 
-                    EvaluateOperation(modified, "Modificación", "barrio", "nombre", true, false, true, true);
+                        while (op < 0 || op > 11)
+                        {
+                            Console.WriteLine("\tCaracterística a modificar");
+                            Console.WriteLine("\t[0] \t--> Salir");
+                            Console.WriteLine("\t[1] \t--> Calle");
+                            Console.WriteLine("\t[2] \t--> Número de puerta");
+                            Console.WriteLine("\t[3] \t--> Barrio");
+                            Console.WriteLine("\t[4] \t--> Descripción");
+                            Console.WriteLine("\t[5] \t--> Cantidad de baños");
+                            Console.WriteLine("\t[6] \t--> Cantidad de dormitorios");
+                            Console.WriteLine("\t[7] \t--> Superficie");
+                            Console.WriteLine("\t[8] \t--> Precio base");
+                            Console.WriteLine("\t[9] \t--> Año de construcción");
+                            Console.WriteLine("\t[10] \t--> Habilitación");
+                            Console.WriteLine("\t[11] \t--> Vendida");
 
+                            op = (int)CompleteField("Ingrese una opción", false, "Int");
+                        }
+
+                        if (op == 0)
+                        {
+                            canceled = true;
+                            CanceledOperation();
+                        }
+                        else
+                        {
+
+                            switch (op)
+                            {
+                                case 1:
+                                    String calle = (String)CompleteField("Calle", false);
+                                    v.calle = calle;
+                                    break;
+
+                                case 2:
+                                    int nro_puerta = (int)CompleteField("Número de puerta", false, "Int");
+                                    v.nro_puerta = nro_puerta;
+                                    break;
+
+                                case 3:
+                                    Barrio barrio = (Barrio)CompleteField("Barrio", false, "Barrio");
+                                    v.barrio = barrio;
+                                    break;
+
+                                case 4:
+                                    String descripcion = (String)CompleteField("Descripcion", false);
+                                    v.descripcion = descripcion;
+                                    break;
+
+                                case 5:
+                                    int nro_banios = (int)CompleteField("Cantidad de baños", false, "Int");
+                                    v.nro_banios = nro_banios;
+                                    break;
+
+                                case 6:
+                                    int nro_dormitorios = (int)CompleteField("Cantidad de doemitorios", false, "Int");
+                                    v.nro_dormitorios = nro_dormitorios;
+                                    break;
+
+                                case 7:
+                                    double superficie = (double)CompleteField("Superficie en m2", false, "Double");
+                                    v.superficie = superficie;
+                                    break;
+
+                                case 8:
+                                    double precio_base = (double)CompleteField("Precio base", false, "Double");
+                                    v.precio_base = precio_base;
+                                    break;
+
+                                case 9:
+                                    int anio_construccion = (int)CompleteField("Año de construcción", false, "Int");
+                                    v.anio_construccion = anio_construccion;
+                                    break;
+
+                                case 10:
+                                    Boolean habilitada = (Boolean) CompleteField("Habilitada?", false, "Boolean");
+                                    v.habilitada = habilitada;
+                                    break;
+
+                                case 11:
+                                    if (v.habilitada)
+                                    {
+                                        Boolean vendida = (Boolean)CompleteField("Vendida?", false, "Boolean");
+                                        v.vendida = vendida;
+                                    }
+                                    else
+                                    {
+                                        Console.WriteLine("La vivienda no esta habilitada para la venta");
+                                        PararPantalla();
+                                    }
+                                    break;
+                            }
+
+                            modified = repoVivienda.Update(v);
+
+
+                            if (modified)
+                            {
+                                Console.WriteLine("Modificación correcta");
+                            } else
+                            {
+                                Console.WriteLine("No se pudo modificar");
+                            }
+
+                            PararPantalla();
+
+                            canceled = !(Boolean)CompleteField("Desea volver a modificar? [s --> Si, n --> No]", false, "Boolean");
+
+                            op = canceled ? 0 : -1;
+                        }
+                    }
                 }
             }
 
@@ -661,15 +901,15 @@ namespace Solucion_Habitacional
         private static void EliminarVivienda()
         {
             Boolean deleted = false, canceled = false;
-            String name = "";
+            int id = -1;
 
-            Console.WriteLine("\nEliminar un Barrio");
+            Console.WriteLine("\nEliminar vivienda");
 
             while (!deleted && !canceled)
             {
-                name = CompleteField("Nombre", true);
+                id = Convert.ToInt32(CompleteField("Id", true, "Int"));
 
-                canceled = name == "";
+                canceled = id == -1;
 
                 if (canceled)
                 {
@@ -677,13 +917,10 @@ namespace Solucion_Habitacional
                 }
                 else
                 {
-                    deleted = repoBarrio.Delete(new Barrio
-                    {
-                        nombre = name,
-                        descripcion = null
-                    });
+                    Vivienda v = repoVivienda.FindById(id);
+                    deleted = repoVivienda.Delete(v);
 
-                    EvaluateOperation(deleted, "Eliminación", "barrio", "nombre", true, false, true, true);
+                    EvaluateOperation(deleted, "Eliminación", "vivienda", "id", true, false, false, true);
 
                 }
             }
@@ -691,8 +928,8 @@ namespace Solucion_Habitacional
 
         private static void GenerarReporteVivienda()
         {
-            Console.WriteLine("\nGenerar Reporte de Barrios");
-            Boolean generado = repoBarrio.GenerateReports();
+            Console.WriteLine("\nGenerar Reporte de Vivienda");
+            Boolean generado = repoVivienda.GenerateReports();
 
             if (generado)
             {
@@ -740,7 +977,7 @@ namespace Solucion_Habitacional
                 Console.WriteLine("8 - Modificar Vivienda");
                 Console.WriteLine("9 - Listar Viviendas");
                 Console.WriteLine("10 - Eliminar Vivienda");
-                Console.WriteLine("11 - Buscar Vivienda por Nombre");
+                Console.WriteLine("11 - Buscar Vivienda por Barrio");
                 Console.WriteLine("12 - Generar Reporte de Vivienda");
                 Console.WriteLine("==================================");
                 Console.WriteLine("============ PARAMETRO ===========");
@@ -891,24 +1128,23 @@ namespace Solucion_Habitacional
 
         private static void MostrarLista(IEnumerable<Object> lista)
         {
-            int i = 0;
-            foreach (Object o in lista)
+            if (lista.Count() == 0)
             {
-                i++;
-                Console.WriteLine("\t" + i + " --> " + o.ToString());
+                Console.WriteLine("\t No se han encontrado los datos solicitados");
+            } else
+            {
+                int i = 0;
+                foreach (Object o in lista)
+                {
+                    i++;
+                    Console.WriteLine("\t" + i + " --> " + o.ToString());
+                }
             }
+            
         }
+        
 
-        private static Boolean Salir()
-        {
-            Console.WriteLine("\n\nSalir");
-            PararPantalla();
-            DibujarMenu();
-            return true;
-            //Environment.Exit(0);
-        }
-
-        private static String CompleteField(String message, Boolean salir)
+        private static Object CompleteField(String message, Boolean salir)
         {
             String field = "";
 
@@ -923,14 +1159,95 @@ namespace Solucion_Habitacional
                 Console.WriteLine("\n" + message + ": ");
                 field = Console.ReadLine();
 
-                if (salir && field == "0") return "";
-
-                if (field == null || field == "")
+                if (salir && field == "0")
+                {
+                    field = "-1";
+                }
+                else if (field == null || field == "")
                 {
                     Console.WriteLine("\n\nOooops\n\tEl campo no puede estar vacío\n\tIngréselo nuevamente");
                 }
             }
             return field;
+        }
+
+        private static Object CompleteField(String message, Boolean exit, String data_type)
+        {
+            Boolean converted = false;
+            Object da = null;
+            switch (data_type)
+            {
+                case "Int":
+                    int i = 0;
+                    while (!converted)
+                    {
+                        converted = int.TryParse((String)CompleteField(message, exit), out i);
+
+                        if (!converted)
+                        {
+                            Console.WriteLine("\n\tEl dato no es válido\n\tIntente nuevamente!");
+                        }
+                    }
+                    da = i;
+                    break;
+
+                case "Double":
+                    double d = 0;
+                    while (!converted)
+                    {
+                        converted = double.TryParse((String)CompleteField(message, exit), out d);
+
+                        if (!converted)
+                        {
+                            Console.WriteLine("\n\tEl dato no es válido\n\tIntente nuevamente!");
+                        }
+                    }
+                    da = d;
+                    break;
+
+                case "Boolean":
+                    Boolean b = false;
+                    String habilitado = "";
+
+                    while (habilitado != "n" && habilitado != "N" && habilitado != "s" && habilitado != "S")
+                    {
+                        habilitado = (String) CompleteField(message, exit);
+
+                        habilitado = (habilitado == "") ? "N" : habilitado;
+
+                        if (habilitado != "n" && habilitado != "N" && habilitado != "s" && habilitado != "S")
+                        {
+                            Console.WriteLine("\n\tEl dato no es válido\n\tIntente nuevamente!");
+                        }
+                    }
+
+                    b = (habilitado == "s" || habilitado == "S") ? true : !(habilitado == "n" || habilitado == "N");
+
+                    da = b;
+
+                    break;
+
+                case "Barrio":
+                    ListarBarrios(false);
+
+                    Barrio ba = null;
+                    
+                    while (ba == null)
+                    {
+                        ba = repoBarrio.FindByName((String) CompleteField(message, exit));
+
+                        if (ba == null)
+                        {
+                            Console.WriteLine("\n\tEl dato no es válido\n\tIntente nuevamente!");
+                        }
+                    }
+
+                    da = ba;
+
+                    break;
+            }
+
+            return da;
         }
 
         private static void CanceledOperation()

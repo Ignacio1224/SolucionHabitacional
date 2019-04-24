@@ -46,6 +46,7 @@ namespace Solucion_Habitacional.Dominio.Repositorios.ADO
                         });
                     }
                 }
+                dr.Close();
 
             }
             catch (SqlException e)

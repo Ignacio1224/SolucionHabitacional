@@ -8,13 +8,15 @@ namespace Solucion_Habitacional.Dominio.InterfacesRepositorio
 {
     interface IRepositorioVivienda
     {
-        Boolean Add(Vivienda vi);
+        Boolean Add(Vivienda v);
 
         Boolean Delete(Vivienda vi);
 
         Boolean Update(Vivienda vi);
 
-        Vivienda FindByLocation(String street, int num);
+        IEnumerable<Vivienda> FindByLocation(Barrio b);
+
+        Vivienda FindById(int id);
 
         IEnumerable<Vivienda> FindAll();
 

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Solucion_Habitacional.Dominio.InterfacesRepositorio
 {
-    interface IRepositorioParametro
+    public interface IRepositorioParametro
     {
         Boolean Add(Parametro p);
 

@@ -46,7 +46,7 @@ namespace Solucion_Habitacional.Dominio
             Repositorios.ADO.RepositorioParametro repoParam = new Repositorios.ADO.RepositorioParametro();
             Parametro p = repoParam.FindByName("tope_metraje_vnueva");
             int current_year = DateTime.Now.Year;
-            int res = Convert.ToInt16(repoParam.FindByName("anio_nueva").valor);
+            int res = Convert.ToInt16(repoParam.FindByName("anio_nueva").valor) | 2;
 
             return current_year - anio_construccion <= res && Convert.ToDouble(p.valor) > superficie;
         }

@@ -2,9 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 
 namespace Solucion_Habitacional.Dominio.Repositorios.ADO
@@ -121,7 +118,10 @@ namespace Solucion_Habitacional.Dominio.Repositorios.ADO
                 {
                     foreach (Parametro p in lista)
                     {
-                        file.Write(p.ToString() + "#");
+                        if (p.nombre != "anio_nueva")
+                        {
+                            file.Write(p.ToString() + "#");
+                        }
                     }
                 }
 

@@ -24,8 +24,12 @@ namespace Solucion_Habitacional
 
                 opcion = LeerOpcion();
 
-                if (opcion != 0)
-                    ProcesarMenu(opcion);
+                if (autenticado && opcion == 0)
+                {  
+                    opcion = -1;
+                }
+
+                ProcesarMenu(opcion);
 
             } while (opcion != 0);
 
@@ -212,7 +216,7 @@ namespace Solucion_Habitacional
                         password = password
                     };
 
-                    deleted = wcfPasante.Eliminar(pasante.user_name);
+                    deleted = wcfPasante.Eliminar(pasante);
 
                     EvaluateOperation(deleted, "Eliminación", "usuario", "contrsaeña", true, false, true, false);
 
@@ -534,7 +538,7 @@ namespace Solucion_Habitacional
             Boolean added = false, canceled = false;
 
             int current_year = DateTime.Now.Year;
-            int anio_es_nueva = Convert.ToInt16(wcfParametro.GetParametro("anio_nueva").value);
+            int anio_es_nueva = Convert.ToInt16(wcfParametro.GetParametro("anio_nueva").value) | 2;
 
             String calle = "", descripcion = "";
             DtoBarrio barrio = null;
@@ -917,6 +921,11 @@ namespace Solucion_Habitacional
 
             switch (opcion)
             {
+                case -1:
+                    autenticado = false;
+                    pasante = null;
+                    break;
+
                 case 1:
                     if (!autenticado)
                     {

@@ -1,8 +1,6 @@
 ﻿using Solucion_Habitacional.Dominio;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 
 namespace Solucion_Habitacional.Servicio
 {

@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Solucion_Habitacional.Dominio.Utilidades;
 using System.Data.SqlClient;
 
@@ -75,7 +72,7 @@ namespace Solucion_Habitacional.Dominio.Repositorios.ADO
 
             try
             {
-                String query = @"SELECT userName FROM PASANTE WHERE useName = @username";
+                String query = @"SELECT userName FROM PASANTE WHERE userName = @username";
                 SqlCommand cmd = new SqlCommand(query, cn, trn);
                 cmd.Parameters.Add(new SqlParameter("@username", username));
                 p = new Pasante {

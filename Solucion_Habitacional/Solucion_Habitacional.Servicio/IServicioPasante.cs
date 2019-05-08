@@ -7,7 +7,7 @@ namespace Solucion_Habitacional.Servicio
 {
 
     [ServiceContract]
-    public interface IServicePasante
+    public interface IServicioPasante
     {
         [OperationContract]
         Boolean Agregar(String user_name, String password);
@@ -16,7 +16,7 @@ namespace Solucion_Habitacional.Servicio
         Boolean Modificar(String user_name, String password);
 
         [OperationContract]
-        Boolean Eliminar(String user_name);
+        Boolean Eliminar(DtoPasante p);
 
         [OperationContract]
         Boolean Ingresar(DtoPasante p);

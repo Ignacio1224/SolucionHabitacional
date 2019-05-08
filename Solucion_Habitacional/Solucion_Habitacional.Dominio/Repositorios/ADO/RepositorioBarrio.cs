@@ -1,10 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Solucion_Habitacional.Dominio;
-using System.Data;
 using Solucion_Habitacional.Dominio.Utilidades;
 using System.Data.SqlClient;
 

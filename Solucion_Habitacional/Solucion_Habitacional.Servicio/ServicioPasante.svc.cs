@@ -5,7 +5,7 @@ using Solucion_Habitacional.Dominio.Repositorios.ADO;
 
 namespace Solucion_Habitacional.Servicio
 {
-    public class ServicePasante : IServicePasante
+    public class ServicePasante : IServicioPasante
     {
         private RepositorioPasante repoP = new RepositorioPasante();
 
@@ -18,9 +18,9 @@ namespace Solucion_Habitacional.Servicio
             });
         }
 
-        public Boolean Eliminar(string user_name)
+        public Boolean Eliminar(DtoPasante p)
         {
-            return repoP.Delete(ObjectConversor.ConvertToPasante(GetPasante(user_name)));
+            return repoP.Delete(ObjectConversor.ConvertToPasante(p));
         }
 
         public DtoPasante GetPasante(String user_name)

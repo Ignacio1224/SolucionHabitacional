@@ -15,17 +15,10 @@ GO
 
 USE Solucion_Habitacional;
 GO
-SELECT * FROM PARAMETRO;
-SELECT * FROM VIVIENDA WHERE id = 3;
-
-DELETE FROM VIVIENDA WHERE id = 5;
-SELECT * FROM VIVIENDA V INNER JOIN VUSADA VS ON V.id = VS.vivienda;
-SELECT * FROM VIVIENDA V INNER JOIN VNUEVA VS ON V.id = VS.vivienda;
-EXEC Delete_Vivienda 7;
-
-DELETE FROM VIVIENDA; DBCC CHECKIDENT('[VIVIENDA]', RESEED, 0);
-DELETE FROM VUSADA; DBCC CHECKIDENT('[VIVIENDA]', RESEED, 0);
-DELETE FROM VNUEVA; DBCC CHECKIDENT('[VIVIENDA]', RESEED, 0);
+DELETE FROM VNUEVA;
+DELETE FROM VUSADA;
+DELETE FROM VIVIENDA;
+SELECT * FROM VIVIENDA
 
 
 -- Create a new table called 'PASANTE'
@@ -89,6 +82,7 @@ CREATE TABLE VIVIENDA (
     habilitada CHAR (1) NOT NULL,
     vendida CHAR (1) NOT NULL,
     barrio [NVARCHAR] (254) NOT NULL,
+	tipo [CHARACTER] (1) NOT NULL,
 
     CONSTRAINT pk_VIVIENDA PRIMARY KEY (id),
     CONSTRAINT fk_barrio_VIVIENDA FOREIGN KEY (barrio) REFERENCES BARRIO (nombre),
@@ -574,7 +568,8 @@ CREATE PROCEDURE Insert_Vivienda
     @precio_base DECIMAL (18, 4) = NULL,
     @habilitada CHAR (1) = '1',
     @vendida CHAR (1) = '0',
-    @barrio [NVARCHAR] (254) = NULL
+    @barrio [NVARCHAR] (254) = NULL,
+	@tipo [CHARACTER] (1) = NULL
 AS
 	BEGIN
 		DECLARE @id INT = -1;
@@ -583,8 +578,8 @@ AS
 		
 		BEGIN TRANSACTION
 
-		INSERT INTO VIVIENDA ([calle], [nro_puerta], [descripcion], [nro_banios], [nro_dormitorios], [superficie], [anio_construccion], [precio_base], [habilitada], [vendida], [barrio])
-		VALUES (@calle, @nro_puerta, @descripcion, @nro_banios, @nro_dormitorios, @superficie, @anio_construccion, @precio_base, @habilitada, @vendida, @barrio)
+		INSERT INTO VIVIENDA ([calle], [nro_puerta], [descripcion], [nro_banios], [nro_dormitorios], [superficie], [anio_construccion], [precio_base], [habilitada], [vendida], [barrio], [tipo])
+		VALUES (@calle, @nro_puerta, @descripcion, @nro_banios, @nro_dormitorios, @superficie, @anio_construccion, @precio_base, @habilitada, @vendida, @barrio, @tipo)
 		SET @id = (SELECT CAST(SCOPE_IDENTITY() AS INT));
 		SELECT @error = @@ERROR;
 
@@ -624,6 +619,7 @@ CREATE PROCEDURE Update_Vivienda
     @habilitada CHAR (1) = '0',
     @vendida CHAR (1) = '0',
     @barrio [NVARCHAR] (254) = NULL,
+	@tipo [CHARACTER] (1) = NULL,
 	@precio_final DECIMAL (18, 4) = NULL,
 	@contribucion [DECIMAL] (18, 4) = NULL
 AS
@@ -648,7 +644,8 @@ AS
 			[precio_base]			= @precio_base,
 			[habilitada]			= @habilitada,
 			[vendida]				= @vendida,
-			[barrio]				= @barrio
+			[barrio]				= @barrio,
+			[tipo]					= @tipo
 			WHERE id = @id;
 
 			SELECT @error = @@ERROR;
@@ -713,8 +710,6 @@ AS
 
 	END
 GO
-EXEC Update_Vivienda 3, 	'C. de Mercedes', 	2926,	'AAAA',					 1, 0, 20000,	 1999, 48200,	1, 0, 'Malvin', 139230.0969, 13923.0097;
-EXEC Update_Vivienda 2, 	'P. Murgiondo', 	2926,	'Cerca del club Malvin', 1, 1, 1.0000,	 2019, 1.0000,	0, 0, 'Malvin', 2.8886;
 
 -- Create a new stored procedure called 'Delete_Vivienda'
 -- Drop the stored procedure if it already exists
@@ -804,187 +799,7 @@ AS
 GO
 
 
--- Create a new stored procedure called 'Insert_VNUEVA'
--- Drop the stored procedure if it already exists
-IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.ROUTINES WHERE SPECIFIC_SCHEMA = N'Solucion_Habitacional' AND SPECIFIC_NAME = N'Insert_VNUEVA')
-	DROP PROCEDURE Insert_VNUEVA;
-GO
-
--- Create the stored procedure in the specified schema
-CREATE PROCEDURE Insert_VNUEVA
-    @id [INT],
-    @precio_final [DECIMAL] (18, 4) = NULL
-AS
-	BEGIN
-		DECLARE @inserted INT = -1;
-		SET NOCOUNT ON;
-
-		IF EXISTS (SELECT 1 FROM VIVIENDA WHERE id = @id) AND NOT EXISTS (SELECT 1 FROM VNUEVA WHERE vivienda = @id)
-		BEGIN
-			INSERT INTO VNUEVA (vivienda, precio_final) VALUES (@id, @precio_final);
-			SET @inserted = @@ERROR;
-
-			IF @inserted = 0
-			BEGIN
-				COMMIT TRANSACTION;
-				SET @inserted = 1;
-			END
-			ELSE
-			BEGIN
-				ROLLBACK TRANSACTION;
-				SET @inserted = 0;
-			END
-		END
-		ELSE
-		BEGIN
-			SET @inserted = 0;
-		END
-		SELECT @inserted;
-	END
-GO
-
-
--- Create a new stored procedure called 'Update_VNUEVA'
--- Drop the stored procedure if it already exists
-IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.ROUTINES WHERE SPECIFIC_SCHEMA = N'Solucion_Habitacional' AND SPECIFIC_NAME = N'Update_VNUEVA')
-	DROP PROCEDURE Update_VNUEVA;
-GO
-
--- Create the stored procedure in the specified schema
-CREATE PROCEDURE Update_VNUEVA
-	@id [INT] = NULL,
-    @precio_final [DECIMAL] (18, 4) = NULL
-AS
-	BEGIN
-		DECLARE @error INT = -1;
-		SET NOCOUNT ON;
-		
-		IF EXISTS (SELECT 1 FROM VNUEVA WHERE vivienda = @id)
-		BEGIN
-
-			BEGIN TRANSACTION
-
-			UPDATE VNUEVA SET precio_final = @precio_final WHERE vivienda = @id;
-			
-			SELECT @error = @@ERROR;
-
-			IF @error = 0
-			BEGIN
-				COMMIT TRANSACTION;
-				SET @error = 1;
-			END
-			ELSE
-			BEGIN
-				ROLLBACK TRANSACTION;
-				SET @error = 0;
-			END
-		END
-		ELSE
-		BEGIN
-			SET @error = 0;
-		END
-
-		SELECT @error;
-
-	END
-GO
-
--- Create a new stored procedure called 'Insert_VUSADA'
--- Drop the stored procedure if it already exists
-IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.ROUTINES WHERE SPECIFIC_SCHEMA = N'Solucion_Habitacional' AND SPECIFIC_NAME = N'Insert_VUSADA')
-	DROP PROCEDURE Insert_VUSADA;
-GO
--- Create the stored procedure in the specified schema
-CREATE PROCEDURE Insert_VUSADA
-    @id INT = NULL,
-    @precio_final [DECIMAL] (18, 4) = NULL,
-    @contribucion [DECIMAL] (18, 4) = NULL
-AS
-
-	BEGIN
-		DECLARE @inserted INT = -1;
-		SET NOCOUNT ON;
-
-		IF EXISTS (SELECT 1 FROM VIVIENDA WHERE id = @id) AND NOT EXISTS (SELECT 1 FROM VUSADA WHERE vivienda = @id)
-		BEGIN
-			INSERT INTO VUSADA(vivienda, precio_final, contribucion) VALUES (@id, @precio_final, @contribucion);
-			SET @inserted = @@ERROR;
-
-			IF @inserted = 0
-			BEGIN
-				COMMIT TRANSACTION;
-				SET @inserted = 1;
-			END
-			ELSE
-			BEGIN
-				ROLLBACK TRANSACTION;
-				SET @inserted = 0;
-			END
-		END
-		ELSE
-		BEGIN
-			SET @inserted = 0;
-		END
-		SELECT @inserted;
-	END
-GO
-
-
--- Create a new stored procedure called 'Update_VUSADA'
--- Drop the stored procedure if it already exists
-IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.ROUTINES WHERE SPECIFIC_SCHEMA = N'Solucion_Habitacional' AND SPECIFIC_NAME = N'Update_VUSADA')
-	DROP PROCEDURE Update_VUSADA;
-GO
-
--- Create the stored procedure in the specified schema
-CREATE PROCEDURE Update_VUSADA
-	@id [INT] = NULL,
-    @precio_final [DECIMAL] (18, 4) = NULL,
-	@contribucion [DECIMAL] (18, 4) = NULL
-AS
-	BEGIN
-		DECLARE @error INT = -1;
-		SET NOCOUNT ON;
-		
-		IF EXISTS (SELECT 1 FROM VUSADA WHERE vivienda = @id)
-		BEGIN
-
-			BEGIN TRANSACTION
-
-			UPDATE VUSADA SET precio_final = @precio_final WHERE vivienda = @id;
-			UPDATE VUSADA SET contribucion = @contribucion WHERE vivienda = @id;
-
-			SELECT @error = @@ERROR;
-
-			IF @error = 0
-			BEGIN
-				COMMIT TRANSACTION;
-				SET @error = 1;
-			END
-			ELSE
-			BEGIN
-				ROLLBACK TRANSACTION;
-				SET @error = 0;
-			END
-		END
-		ELSE
-		BEGIN
-			SET @error = 0;
-		END
-
-		SELECT @error;
-
-	END
-GO
-
--- Create a new stored procedure called 'Delete_VUSADA'
--- Drop the stored procedure if it already exists
-IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.ROUTINES WHERE SPECIFIC_SCHEMA = N'Solucion_Habitacional' AND SPECIFIC_NAME = N'Tipo_Vivienda')
-	DROP PROCEDURE Tipo_Vivienda;
-GO
-
--- Create the stored procedure in the specified schema
-CREATE PROCEDURE Tipo_Vivienda
+CREATE PROCEDURE Tipo_vivienda
 	@id [INT] = NULL
 AS
 	BEGIN
@@ -993,17 +808,22 @@ AS
 
 		SET NOCOUNT ON;
 		
-		IF EXISTS (SELECT 1 FROM VNUEVA WHERE vivienda = @id)
-		BEGIN
-			SET @tipo = 0;
-		END
-
-		IF EXISTS (SELECT 1 FROM VUSADA WHERE vivienda = @id)
-		BEGIN
-			SET @tipo = 1;
-		END
-
-		SELECT @tipo AS 'tipo_vivienda';
+		SELECT @tipo AS 'Tipo' FROM VIVIENDA WHERE id = @id;
 
 	END
 GO
+
+
+/* Trigger Reset Identity Vivienda */
+
+CREATE TRIGGER ResetViviendaId
+	ON VIVIENDA
+	AFTER INSERT, UPDATE, DELETE
+AS
+	BEGIN
+		SET NOCOUNT ON;
+		DECLARE @MAXC INT;
+		SELECT @MAXC = ISNULL(MAX(id), 0) FROM VIVIENDA;
+		DBCC CHECKIDENT (Vivienda, RESEED, @MAXC);
+	END
+

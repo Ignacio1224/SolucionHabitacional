@@ -49,9 +49,9 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Solucion_Habitacional.Dominio\Solucion_Habitacional.Dominio.csproj">
-      <Project>{52a203d7-d9dd-45eb-a2f0-ec598218b468}</Project>
-      <Name>Solucion_Habitacional.Dominio</Name>
+    <ProjectReference Include="..\Solucion_Habitacional.Servicio\Solucion_Habitacional.Servicio.csproj">
+      <Project>{69ab7cca-f129-4612-bbe2-819db1a68b1a}</Project>
+      <Name>Solucion_Habitacional.Servicio</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

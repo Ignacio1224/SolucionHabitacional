@@ -1,11 +1,7 @@
 ﻿using Solucion_Habitacional.Dominio.Utilidades;
 using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Solucion_Habitacional.Dominio
 {
@@ -19,18 +15,17 @@ namespace Solucion_Habitacional.Dominio
             Repositorios.ADO.RepositorioParametro rp = new Repositorios.ADO.RepositorioParametro();
             double cf = precio_base * Math.Pow((1 + Convert.ToDouble(rp.FindByName("interes").valor) / 100), Convert.ToDouble(rp.FindByName("plazo_fijo_vusada").valor));
 
-            cf += cf * (Convert.ToDouble(rp.FindByName("itp").valor)/100);
+            cf += cf * (Convert.ToDouble(rp.FindByName("itp").valor) / 100);
             contribucion = cf * (Convert.ToDouble(rp.FindByName("contribucion").valor) / 100);
             return cf;
         }
 
         public override Boolean Insertar()
         {
-            Boolean flag = base.Insertar();
+            Boolean flag = false;
 
-            if (flag && !base.Es_Nueva())
+            if (!base.Es_Nueva())
             {
-                flag = false;
                 String query = @"Insert_VUSADA";
                 SqlConnection cn = UtilidadesDB.CreateConnection();
                 UtilidadesDB.OpenConnection(cn);
@@ -38,17 +33,22 @@ namespace Solucion_Habitacional.Dominio
 
                 try
                 {
-                    SqlCommand cmd = new SqlCommand(query, cn, trn);
-                    cmd.CommandType = CommandType.StoredProcedure;
-                    precio_final = CalcularPrecio();
-                    cmd.Parameters.Add(new SqlParameter("@id", id));
-                    cmd.Parameters.Add(new SqlParameter("@precio_final", precio_final));
-                    cmd.Parameters.Add(new SqlParameter("@contribucion", contribucion));
+                    flag = base.AuxInsertar(trn, cn);
 
-                    flag = (int)cmd.ExecuteScalar() > 0;
-                    
-                    trn.Commit();
+                    if (flag)
+                    {
+                        SqlCommand cmd = new SqlCommand(query, cn, trn);
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        precio_final = CalcularPrecio();
+                        cmd.Parameters.Add(new SqlParameter("@id", id));
+                        cmd.Parameters.Add(new SqlParameter("@precio_final", precio_final));
+                        cmd.Parameters.Add(new SqlParameter("@contribucion", contribucion));
 
+                        flag = (int)cmd.ExecuteScalar() > 0;
+
+                        trn.Commit();
+
+                    }
                 }
                 catch (SqlException e)
                 {
@@ -57,7 +57,7 @@ namespace Solucion_Habitacional.Dominio
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine("Error" + ex.Message);
+                    //Console.WriteLine("Error" + ex.Message); // Connection is no longer usable, but it saves the object into database
                 }
                 finally
                 {
@@ -99,7 +99,7 @@ namespace Solucion_Habitacional.Dominio
                     cmd.Parameters.Add(new SqlParameter("@barrio", barrio.nombre));
                     cmd.Parameters.Add(new SqlParameter("@precio_final", precio_final));
                     cmd.Parameters.Add(new SqlParameter("@contribucion", contribucion));
-
+                    cmd.Parameters.Add(new SqlParameter("@tipo", tipo));
                     flag = (int)cmd.ExecuteScalar() == 1;
 
                     trn.Commit();
@@ -129,5 +129,13 @@ namespace Solucion_Habitacional.Dominio
             return base.ToString()
                 + "\n\t\t" + "Contribución: " + contribucion + "\n\t\t" + "Precio final: " + precio_final;
         }
+
+        public override String DatosReporte()
+        {
+            return id + "#" + calle + "#" + nro_puerta + "#" + barrio.nombre + "#" + descripcion
+                   + "#" + nro_banios + "#" + nro_dormitorios + "#" + superficie + "#" + anio_construccion + "#" + precio_final
+                   + "#" + contribucion + "#Usada";
+        }
     }
 }
+

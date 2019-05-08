@@ -1,23 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Solucion_Habitacional.Dominio;
-using Solucion_Habitacional.Dominio.Repositorios.ADO;
-
+using Solucion_Habitacional.Servicio;
 
 namespace Solucion_Habitacional
 {
     class Program
     {
-        static RepositorioBarrio repoBarrio = new RepositorioBarrio();
-        static RepositorioPasante repoPasante = new RepositorioPasante();
-        static RepositorioParametro repoParametro = new RepositorioParametro();
-        static RepositorioVivienda repoVivienda = new RepositorioVivienda();
+        static ServicePasante wcfPasante = new ServicePasante();
+        static ServicioBarrio wcfBarrio = new ServicioBarrio();
+        static ServicioParametro wcfParametro = new ServicioParametro();
+        static ServicioVivienda wcfVivienda = new ServicioVivienda();
 
         static Boolean autenticado = false;
-        static Pasante pasante = null;
+        static DtoPasante pasante = null;
 
         static void Main(string[] args)
         {
@@ -37,6 +33,199 @@ namespace Solucion_Habitacional
 
             PararPantalla();
         }
+
+
+        #region PASANTE
+        private static void Ingresar(Boolean salt = false)
+        {
+            Boolean canceled = false;
+            String user_name = "", password = "";
+
+            Console.WriteLine("\nIngresar");
+
+            while (!autenticado && !canceled)
+            {
+                if (pasante == null)
+                {
+                    user_name = (String)CompleteField("Email", true);
+
+                    canceled = user_name == "-1";
+
+                    if (canceled)
+                    {
+                        CanceledOperation();
+                    }
+                    else
+                    {
+                        password = (String)CompleteField("Contraseña", false);
+
+                        pasante = new DtoPasante
+                        {
+                            user_name = user_name,
+                            password = password
+                        };
+                    }
+                }
+
+                if (pasante != null)
+                {
+                    autenticado = wcfPasante.Ingresar(pasante);
+                    
+                    if (!autenticado)
+                    {
+                        pasante = null;
+                    }
+
+                    if (!salt)
+                    {
+                        EvaluateOperation(autenticado, "Ingreso", "usuario", "nombre de usuario", true, true, true, true);
+                    }
+                }
+            }
+        }
+
+        private static void AgregarPasante()
+        {
+            Boolean added = false, canceled = false;
+            String name = "", password1 = "a", password2 = "b";
+
+            Console.WriteLine("\nRegistrarme");
+
+
+            while (!added && !canceled && password1 != password2)
+            {
+                name = (String)CompleteField("Email", true);
+                canceled = name == "-1";
+
+                if (canceled)
+                {
+                    CanceledOperation();
+                }
+                else
+                {
+                    password1 = (String)CompleteField("Contraseña", false);
+                    password2 = (String)CompleteField("Contraseña", false);
+
+                    if (password1 != password2)
+                    {
+                        Console.WriteLine("\nLas contrasenas no coinciden, intente de nuevo!\n\n");
+                    }
+                    else
+                    {
+                        pasante = new DtoPasante
+                        {
+                            user_name = name,
+                            password = password2
+                        };
+
+                        added = wcfPasante.Agregar(name, password2);
+
+                        EvaluateOperation(added, "Registro", "usuario", "email", false, true, true, true);
+
+                        if (!added)
+                        {
+                            password1 = "a";
+                            password2 = "b";
+                        }
+                        else
+                        {
+                            Ingresar(true);
+                        }
+                    }
+                }
+            }
+        }
+
+        private static void ModificarPasante()
+        {
+            Boolean modified = false, canceled = false;
+            String password1 = "a", password2 = "b";
+
+
+            Console.WriteLine("\nCambiar Contrasena");
+
+            while (!modified && !canceled && password1 != password2)
+            {
+
+                password1 = (String)CompleteField("Contraseña", true);
+
+                canceled = password1 == "-1";
+
+                if (canceled)
+                {
+                    CanceledOperation();
+                }
+                else
+                {
+                    password2 = (String)CompleteField("Contraseña", false);
+
+                    if (password1 != password2)
+                    {
+                        Console.WriteLine("\nLas contrasenas no coinciden, intente de nuevo!\n\n");
+                    }
+                    else
+                    {
+                        pasante = new DtoPasante
+                        {
+                            user_name = pasante.user_name,
+                            password = password2
+                        };
+
+                        modified = wcfPasante.Modificar(pasante.user_name, password2);
+
+                        if (!modified)
+                        {
+                            password1 = "a";
+                            password2 = "b";
+                        }
+
+                        EvaluateOperation(modified, "Modificación", "usuario", "contraseña", true, false, true, false);
+
+                    }
+                }
+            }
+
+        }
+
+        private static void EliminarPasante()
+        {
+            Boolean deleted = false, canceled = false;
+            String password = "";
+
+            Console.WriteLine("\nDarme de Baja");
+
+            while (!deleted && !canceled)
+            {
+                password = (String)CompleteField("Contraseña", true);
+
+                canceled = password == "-1";
+
+                if (canceled)
+                {
+                    CanceledOperation();
+                }
+                else
+                {
+                    pasante = new DtoPasante
+                    {
+                        user_name = pasante.user_name,
+                        password = password
+                    };
+
+                    deleted = wcfPasante.Eliminar(pasante.user_name);
+
+                    EvaluateOperation(deleted, "Eliminación", "usuario", "contrsaeña", true, false, true, false);
+
+                    if (deleted)
+                    {
+                        autenticado = false;
+                        pasante = null;
+                    }
+
+                }
+            }
+        }
+        #endregion
 
         #region PARAMETRO
 
@@ -61,11 +250,7 @@ namespace Solucion_Habitacional
                 {
                     valor = (String) CompleteField("Valor", false);
 
-                    added = repoParametro.Add(new Parametro
-                    {
-                        nombre = name,
-                        valor = valor
-                    });
+                    added = wcfParametro.Agregar(name, valor);
 
                     EvaluateOperation(added, "Ingreso", "parámetro", "nombre", false, true, true, true);
 
@@ -94,11 +279,7 @@ namespace Solucion_Habitacional
                 {
                     valor = (String) CompleteField("Valor", false);
 
-                    modified = repoParametro.Update(new Parametro
-                    {
-                        nombre = name,
-                        valor = valor
-                    });
+                    modified = wcfParametro.Modificar(name, valor);
 
                     EvaluateOperation(modified, "Modificación", "parámetro", "nombre", true, false, true, true);
 
@@ -125,11 +306,7 @@ namespace Solucion_Habitacional
                 }
                 else
                 {
-                    deleted = repoParametro.Delete(new Parametro
-                    {
-                        nombre = name,
-                        valor = ""
-                    });
+                    deleted = wcfParametro.Eliminar(name);
 
                     EvaluateOperation(deleted, "Eliminación", "parámetro", "nombre", true, false, true, true);
 
@@ -140,7 +317,7 @@ namespace Solucion_Habitacional
         private static void ListarParametros()
         {
             Console.WriteLine("\nListar Parametros");
-            var lista = repoParametro.FindAll();
+            var lista = wcfParametro.ObtenerTodos();
             MostrarLista(lista);
             PararPantalla();
         }
@@ -149,7 +326,7 @@ namespace Solucion_Habitacional
         {
             Boolean founded = false, canceled = false;
             String name = "";
-            Parametro p = null;
+            DtoParametro p = null;
 
             while (!founded && !canceled && p == null)
             {
@@ -163,7 +340,7 @@ namespace Solucion_Habitacional
                 }
                 else
                 {
-                    p = repoParametro.FindByName(name);
+                    p = wcfParametro.GetParametro(name);
 
                     if (p != null)
                     {
@@ -182,7 +359,7 @@ namespace Solucion_Habitacional
         private static void GenerarReporteParametro()
         {
             Console.WriteLine("\nGenerar Reporte de Parametros");
-            Boolean generado = repoParametro.GenerateReports();
+            Boolean generado = wcfParametro.GenerateReport();
 
             if (generado)
             {
@@ -196,197 +373,6 @@ namespace Solucion_Habitacional
             PararPantalla();
         }
 
-        #endregion
-
-        #region PASANTE
-        private static void Ingresar(Boolean salt = false)
-        {
-            Boolean canceled = false;
-            String user_name = "", password = "";
-
-            Console.WriteLine("\nIngresar");
-
-            while (!autenticado && !canceled)
-            {
-                if (pasante == null)
-                {
-                    user_name = (String) CompleteField("Email", true);
-
-                    canceled = user_name == "-1";
-
-                    if (canceled)
-                    {
-                        CanceledOperation();
-                    }
-                    else
-                    {
-                        password = (String) CompleteField("Contraseña", false);
-
-                        pasante = new Pasante
-                        {
-                            user_name = user_name,
-                            password = password
-                        };
-                    }
-                }
-                
-                if (pasante != null)
-                {
-                    autenticado = repoPasante.Ingresar(pasante);
-
-                    if (!autenticado)
-                    {
-                        pasante = null;
-                    }
-
-                    if (!salt)
-                    {
-                        EvaluateOperation(autenticado, "Ingreso", "usuario", "nombre de usuario", true, true, true, true);
-                    }
-                }
-            }
-        }
-
-        private static void AgregarPasante()
-        {
-            Boolean added = false, canceled = false;
-            String name = "", password1 = "a", password2 = "b";
-
-            Console.WriteLine("\nRegistrarme");
-
-
-            while (!added && !canceled && password1 != password2)
-            {
-                name = (String) CompleteField("Email", true);
-                canceled = name == "-1";
-
-                if (canceled)
-                {
-                    CanceledOperation();
-                }
-                else
-                {
-                    password1 = (String) CompleteField("Contraseña", false);
-                    password2 = (String) CompleteField("Contraseña", false);
-
-                    if (password1 != password2)
-                    {
-                        Console.WriteLine("\nLas contrasenas no coinciden, intente de nuevo!\n\n");
-                    }
-                    else
-                    {
-                        pasante = new Pasante
-                        {
-                            user_name = name,
-                            password = password2
-                        };
-
-                        added = repoPasante.Add(pasante);
-
-                        EvaluateOperation(added, "Registro", "usuario", "email", false, true, true, true);
-
-                        if (!added)
-                        {
-                            password1 = "a";
-                            password2 = "b";
-                        } else
-                        {
-                            Ingresar(true);
-                        }
-                    }
-                }
-            }
-        }
-
-        private static void ModificarPasante()
-        {
-            Boolean modified = false, canceled = false;
-            String password1 = "a", password2 = "b";
-
-
-            Console.WriteLine("\nCambiar Contrasena");
-            
-            while (!modified && !canceled && password1 != password2)
-            {
-
-                password1 = (String) CompleteField("Contraseña", true);
-
-                canceled = password1 == "-1";
-
-                if (canceled)
-                {
-                    CanceledOperation();
-                }
-                else
-                {
-                    password2 = (String) CompleteField("Contraseña", false);
-
-                    if (password1 != password2)
-                    {
-                        Console.WriteLine("\nLas contrasenas no coinciden, intente de nuevo!\n\n");
-                    }
-                    else
-                    {
-                        pasante = new Pasante
-                        {
-                            user_name = pasante.user_name,
-                            password = password2
-                        };
-
-                        modified = repoPasante.Update(pasante);
-
-                        if (!modified)
-                        {
-                            password1 = "a";
-                            password2 = "b";
-                        }
-
-                        EvaluateOperation(modified, "Modificación", "usuario", "contraseña", true, false, true, false);
-
-                    }
-                }
-            }
-
-        }
-
-        private static void EliminarPasante()
-        {
-            Boolean deleted = false, canceled = false;
-            String password = "";
-
-            Console.WriteLine("\nDarme de Baja");
-
-            while (!deleted && !canceled)
-            {
-                password = (String) CompleteField("Contraseña", true);
-
-                canceled = password == "-1";
-
-                if (canceled)
-                {
-                    CanceledOperation();
-                }
-                else
-                {
-                    pasante = new Pasante
-                    {
-                        user_name = pasante.user_name,
-                        password = password
-                    };
-
-                    deleted = repoPasante.Delete(pasante);
-
-                    EvaluateOperation(deleted, "Eliminación", "usuario", "contrsaeña", true, false, true, false);
-
-                    if (deleted)
-                    {
-                        autenticado = false;
-                        pasante = null;
-                    }
-
-                }
-            }
-        }
         #endregion
 
         #region BARRIO
@@ -411,11 +397,7 @@ namespace Solucion_Habitacional
                 {
                     desc = (String) CompleteField("Descripcion", false);
 
-                    added = repoBarrio.Add(new Barrio
-                    {
-                        nombre = name,
-                        descripcion = desc
-                    });
+                    added = wcfBarrio.Agregar(name, desc);
 
                     EvaluateOperation(added, "Ingreso", "barrio", "nombre", false, true, true, true);
 
@@ -426,7 +408,9 @@ namespace Solucion_Habitacional
         private static void ListarBarrios(Boolean cont = true)
         {
             Console.WriteLine("\nListar Barrios");
-            var lista = repoBarrio.FindAll();
+
+            var lista = wcfBarrio.ObtenerTodos();
+
             MostrarLista(lista);
 
             if (cont)
@@ -439,7 +423,7 @@ namespace Solucion_Habitacional
         {
             Boolean founded = false, canceled = false;
             String name = "";
-            Barrio b = null;
+            DtoBarrio b = null;
 
             while (!founded && !canceled && b == null)
             {
@@ -452,11 +436,10 @@ namespace Solucion_Habitacional
                     CanceledOperation();
                 } else
                 {
-                    b = repoBarrio.FindByName(name);
-
+                    b = wcfBarrio.GetBarrio(name);
                     if (b != null)
                     {
-                        Console.WriteLine("\n\tSe ha encontrado 1 barrio: " + b.ToString());
+                        Console.WriteLine("\n\tSe ha encontrado el barrio: \n\t\t" + b.ToString());
                     } else
                     {
                         Console.WriteLine("\n\tNo se ha encontrado nungún barrio con el nombre: " + name);
@@ -490,12 +473,8 @@ namespace Solucion_Habitacional
                 {
                     desc = (String) CompleteField("Descripcion", false);
 
-                    modified = repoBarrio.Update(new Barrio
-                    {
-                        nombre = name,
-                        descripcion = desc
-                    });
-
+                    modified = wcfBarrio.Modificar(name, desc);
+                    
                     EvaluateOperation(modified, "Modificación", "barrio", "nombre", true, false, true, true);
 
                 }
@@ -522,11 +501,7 @@ namespace Solucion_Habitacional
                 }
                 else
                 {
-                    deleted = repoBarrio.Delete(new Barrio
-                    {
-                        nombre = name,
-                        descripcion = null
-                    });
+                    deleted = wcfBarrio.Eliminar(name);
 
                     EvaluateOperation(deleted, "Eliminación", "barrio", "nombre", true, false, true, true);
 
@@ -537,7 +512,7 @@ namespace Solucion_Habitacional
         private static void GenerarReporteBarrio()
         {
             Console.WriteLine("\nGenerar Reporte de Barrios");
-            Boolean generado = repoBarrio.GenerateReports();
+            Boolean generado = wcfBarrio.GenerateReport();
 
             if (generado)
             {
@@ -559,10 +534,10 @@ namespace Solucion_Habitacional
             Boolean added = false, canceled = false;
 
             int current_year = DateTime.Now.Year;
-            int anio_es_nueva = Convert.ToInt16(repoParametro.FindByName("anio_nueva").valor) | 2;
+            int anio_es_nueva = Convert.ToInt16(wcfParametro.GetParametro("anio_nueva").value);
 
             String calle = "", descripcion = "";
-            Barrio barrio = null;
+            DtoBarrio barrio = null;
             int nro_puerta = 0, nro_banios = 0, nro_dormitorios = 0, anio_construccion = 0;
             double superficie = 0.0, precio_base = 0.0;
             Boolean vendida = false, habilitada = false, intenta_ser_nueva = false;
@@ -612,34 +587,13 @@ namespace Solucion_Habitacional
 
                     descripcion = (String)CompleteField("Descripcion", false);
 
-                    barrio = (Barrio) CompleteField("Nombre del barrio", false, "Barrio");
+                    barrio = (DtoBarrio) CompleteField("Nombre del barrio", false, "DtoBarrio");
 
-                    if (intenta_ser_nueva)
-                    {
-                        added = AddVNueva(calle, nro_puerta, barrio, descripcion, nro_banios,
-                                nro_dormitorios, superficie, precio_base, anio_construccion, vendida,
-                                habilitada);
-
-                        if (!added)
-                        {
-                            added = AddVNueva(calle, nro_puerta, barrio, descripcion, nro_banios,
-                                nro_dormitorios, superficie, precio_base, anio_construccion, vendida,
-                                habilitada);
-                        }
-                    } else
-                    {
-                        added = AddUsada(calle, nro_puerta, barrio, descripcion, nro_banios,
-                                nro_dormitorios, superficie, precio_base, anio_construccion, vendida,
-                                habilitada);
-
-                        if (!added)
-                        {
-                            added = AddVNueva(calle, nro_puerta, barrio, descripcion, nro_banios,
-                                nro_dormitorios, superficie, precio_base, anio_construccion, vendida, 
-                                habilitada);
-                        }
-                    }
-
+                    
+                    added = wcfVivienda.Agregar(calle, nro_puerta, barrio, descripcion, nro_banios,
+                            nro_dormitorios, superficie, precio_base, anio_construccion, vendida,
+                            habilitada, intenta_ser_nueva);
+                    
                     if (added)
                     {
                         Console.WriteLine("Ingreso correcto");
@@ -653,68 +607,10 @@ namespace Solucion_Habitacional
             }
         }
 
-        private static Boolean AddVNueva(String calle, int nro_puerta, Barrio barrio, 
-            String descripcion, int nro_banios, int nro_dormitorios, 
-            double superficie, double precio_base, int anio_construccion,
-            Boolean vendida, Boolean habilitada)
-        {
-            Boolean added = false;
-            VNueva v = new VNueva
-            {
-                calle = calle,
-                nro_puerta = nro_puerta,
-                barrio = barrio,
-                descripcion = descripcion,
-                nro_banios = nro_banios,
-                nro_dormitorios = nro_dormitorios,
-                superficie = superficie,
-                precio_base = precio_base,
-                anio_construccion = anio_construccion,
-                vendida = vendida,
-                habilitada = habilitada
-            };
-
-            if (v.Es_Nueva())
-            {
-                added = repoVivienda.Add(v);
-            }
-
-            return added;
-        }
-
-        private static Boolean AddUsada(String calle, int nro_puerta, Barrio barrio,
-            String descripcion, int nro_banios, int nro_dormitorios,
-            double superficie, double precio_base, int anio_construccion,
-            Boolean vendida, Boolean habilitada)
-        {
-            Boolean added = false;
-            VUsada v = new VUsada
-            {
-                calle = calle,
-                nro_puerta = nro_puerta,
-                barrio = barrio,
-                descripcion = descripcion,
-                nro_banios = nro_banios,
-                nro_dormitorios = nro_dormitorios,
-                superficie = superficie,
-                precio_base = precio_base,
-                anio_construccion = anio_construccion,
-                vendida = vendida,
-                habilitada = habilitada
-            };
-
-            if (!v.Es_Nueva())
-            {
-                added = repoVivienda.Add(v);
-            }
-
-            return added;
-        }
-
         private static void ListarViviendas()
         {
-            Console.WriteLine("\nListar Barrios");
-            var lista = repoVivienda.FindAll();
+            Console.WriteLine("\nListar Viviendas");
+            var lista = wcfVivienda.FindAll();
             MostrarLista(lista);
             PararPantalla();
         }
@@ -723,13 +619,13 @@ namespace Solucion_Habitacional
         {
             Boolean founded = false, canceled = false;
             String name = "";
-            Barrio b = null;
+            DtoBarrio b = null;
 
-            
+
 
             while (!founded && !canceled && b == null)
             {
-                name = (String) CompleteField("Nombre del barrio", true);
+                name = (String)CompleteField("Nombre del barrio", true);
 
                 canceled = name == "-1";
 
@@ -739,11 +635,11 @@ namespace Solucion_Habitacional
                 }
                 else
                 {
-                    b = repoBarrio.FindByName(name);
+                    b = wcfBarrio.GetBarrio(name);
 
                     if (b != null)
                     {
-                        MostrarLista(repoVivienda.FindByLocation(b));
+                        MostrarLista(wcfVivienda.GetViviendas(b));
                     }
                     else
                     {
@@ -775,7 +671,7 @@ namespace Solucion_Habitacional
                 }
                 else
                 {
-                    Vivienda v = repoVivienda.FindById(id);
+                    DtoVivienda v = wcfVivienda.FindById(id);
 
                     int op = -1;
 
@@ -822,7 +718,7 @@ namespace Solucion_Habitacional
                                     break;
 
                                 case 3:
-                                    Barrio barrio = (Barrio)CompleteField("Barrio", false, "Barrio");
+                                    DtoBarrio barrio = (DtoBarrio)CompleteField("Barrio", false, "DtoBarrio");
                                     v.barrio = barrio;
                                     break;
 
@@ -875,7 +771,7 @@ namespace Solucion_Habitacional
                                     break;
                             }
 
-                            modified = repoVivienda.Update(v);
+                            modified = wcfVivienda.Modificar(v);
 
 
                             if (modified)
@@ -917,8 +813,8 @@ namespace Solucion_Habitacional
                 }
                 else
                 {
-                    Vivienda v = repoVivienda.FindById(id);
-                    deleted = repoVivienda.Delete(v);
+                    DtoVivienda v = wcfVivienda.FindById(id);
+                    deleted = wcfVivienda.Eliminar(v);
 
                     EvaluateOperation(deleted, "Eliminación", "vivienda", "id", true, false, false, true);
 
@@ -929,7 +825,7 @@ namespace Solucion_Habitacional
         private static void GenerarReporteVivienda()
         {
             Console.WriteLine("\nGenerar Reporte de Vivienda");
-            Boolean generado = repoVivienda.GenerateReports();
+            Boolean generado = wcfVivienda.GenerateReport();
 
             if (generado)
             {
@@ -944,7 +840,6 @@ namespace Solucion_Habitacional
         }
 
         #endregion
-
 
         #region UTILITIES
         private static void DibujarMenu()
@@ -1143,7 +1038,6 @@ namespace Solucion_Habitacional
             
         }
         
-
         private static Object CompleteField(String message, Boolean salir)
         {
             String field = "";
@@ -1227,14 +1121,14 @@ namespace Solucion_Habitacional
 
                     break;
 
-                case "Barrio":
+                case "DtoBarrio":
                     ListarBarrios(false);
 
-                    Barrio ba = null;
+                    DtoBarrio ba = null;
                     
                     while (ba == null)
                     {
-                        ba = repoBarrio.FindByName((String) CompleteField(message, exit));
+                        ba = wcfBarrio.GetBarrio((String)CompleteField(message, exit));
 
                         if (ba == null)
                         {
@@ -1272,5 +1166,6 @@ namespace Solucion_Habitacional
         }
 
         #endregion
+
     }
 }

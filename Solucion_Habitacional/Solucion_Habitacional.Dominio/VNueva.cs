@@ -14,7 +14,7 @@ namespace Solucion_Habitacional.Dominio
 
         public double precio_final { get; set; }
 
-        public override double CalcularPrecio()
+        public override Double CalcularPrecio()
         {
             Repositorios.ADO.RepositorioParametro rp = new Repositorios.ADO.RepositorioParametro();
             double cf = precio_base * Math.Pow((1 + Convert.ToDouble(rp.FindByName("interes").valor) / 100), Convert.ToDouble(rp.FindByName("plazo_fijo_vusada").valor));
@@ -26,12 +26,10 @@ namespace Solucion_Habitacional.Dominio
 
         public override Boolean Insertar()
         {
-            Boolean flag = base.Insertar();
+            Boolean flag = false;
 
-            if (flag && base.Es_Nueva())
+            if (base.Es_Nueva())
             {
-                flag = false;
-
                 String query = @"Insert_VNUEVA";
                 SqlConnection cn = UtilidadesDB.CreateConnection();
                 UtilidadesDB.OpenConnection(cn);
@@ -39,18 +37,23 @@ namespace Solucion_Habitacional.Dominio
 
                 try
                 {
-                    SqlCommand cmd = new SqlCommand(query, cn, trn);
-                    cmd.CommandType = CommandType.StoredProcedure;
-                    
-                    precio_final = CalcularPrecio();
+                    flag = base.AuxInsertar(trn, cn);
 
-                    cmd.Parameters.Add(new SqlParameter("@id", id));
-                    cmd.Parameters.Add(new SqlParameter("@precio_final", precio_final));
+                    if (flag)
+                    {
+                        SqlCommand cmd = new SqlCommand(query, cn, trn);
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        precio_final = CalcularPrecio();
 
-                    flag = (int) cmd.ExecuteScalar() > 0;
 
-                    trn.Commit();
+                        cmd.Parameters.Add(new SqlParameter("@id", id));
+                        cmd.Parameters.Add(new SqlParameter("@precio_final", precio_final));
 
+                        flag = (int)cmd.ExecuteScalar() > 0;
+
+                        trn.Commit();
+
+                    }
                 }
                 catch (SqlException e)
                 {
@@ -67,7 +70,7 @@ namespace Solucion_Habitacional.Dominio
                     cn.Dispose();
                 }
             }
-            
+
             return flag;
         }
 
@@ -125,10 +128,17 @@ namespace Solucion_Habitacional.Dominio
             return flag;
         }
 
-        public override string ToString()
+        public override String ToString()
         {
-            return base.ToString() 
+            return base.ToString()
                 + "\n\t\t" + "Precio final: " + precio_final;
+        }
+
+        public override String DatosReporte()
+        {
+            return id + "#" + calle + "#" + nro_puerta + "#" + barrio.nombre + "#" + descripcion
+                   + "#" + nro_banios + "#" + nro_dormitorios + "#" + superficie + "#" + anio_construccion + "#" + precio_final
+                   + "#Nueva";
         }
     }
 }

@@ -56,10 +56,6 @@ namespace Solucion_Habitacional.Dominio
                     trn.Rollback();
                     Console.WriteLine("Se ha producido un error " + e.Message);
                 }
-                catch (Exception ex)
-                {
-                    Console.WriteLine("Error" + ex.Message);
-                }
                 finally
                 {
                     UtilidadesDB.CloseConnection(cn);

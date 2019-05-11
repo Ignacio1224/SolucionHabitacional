@@ -55,10 +55,6 @@ namespace Solucion_Habitacional.Dominio
                     trn.Rollback();
                     Console.WriteLine("Se ha producido un error " + e.Message);
                 }
-                catch (Exception ex)
-                {
-                    //Console.WriteLine("Error" + ex.Message); // Connection is no longer usable, but it saves the object into database
-                }
                 finally
                 {
                     UtilidadesDB.CloseConnection(cn);
